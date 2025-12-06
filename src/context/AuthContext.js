@@ -124,7 +124,7 @@ export const AuthProvider = ({ children }) => {
       return { success: true };
     } catch (error) {
       dispatch({ type: AUTH_ACTIONS.SET_LOADING, payload: false });
-      const message = error.response?.data?.error?.message || 'Giriş başarısız!';
+      const message = error.userMessage || error.response?.data?.error?.message || 'Giriş başarısız!';
       showToast(message, 'error');
       return { success: false, error: message };
     }

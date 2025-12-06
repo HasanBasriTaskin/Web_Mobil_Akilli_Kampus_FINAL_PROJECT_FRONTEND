@@ -61,17 +61,40 @@ frontend/
    ```
 
 2. **Environment variables ayarlayın:**
-   `.env.example` dosyasını `.env` olarak kopyalayın ve gerekli değerleri doldurun:
+   `.env` dosyası oluşturun ve gerekli değerleri doldurun:
    ```env
    REACT_APP_API_BASE_URL=http://localhost:5000/api/v1
    REACT_APP_APP_NAME=Akıllı Kampüs Platformu
    ```
 
-3. **Uygulamayı çalıştırın:**
+3. **Mock API Server'ı başlatın (Backend yoksa):**
+   ```bash
+   cd mock-server
+   npm install
+   npm start
+   ```
+   Mock server `http://localhost:5000` adresinde çalışacaktır.
+
+4. **Uygulamayı çalıştırın:**
    ```bash
    npm start
    ```
    Uygulama `http://localhost:3000` adresinde açılacaktır.
+
+### Mock API Server
+
+Backend projesi olmadığında frontend'i test etmek için mock API server kullanılabilir. Mock server şu özellikleri sağlar:
+
+- ✅ Kullanıcı kaydı (Register)
+- ✅ Kullanıcı girişi (Login)
+- ✅ Token yenileme (Refresh Token)
+- ✅ Kullanıcı bilgileri (Get Current User)
+- ✅ Profil güncelleme
+- ✅ Email doğrulama (mock)
+- ✅ Şifre sıfırlama (mock)
+- ✅ Profil fotoğrafı yükleme (mock)
+
+**Not:** Mock server verileri bellekte tutar, sunucu yeniden başlatıldığında veriler sıfırlanır.
 
 ## Özellikler (Part 1)
 

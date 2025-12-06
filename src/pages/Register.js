@@ -82,26 +82,74 @@ const Register = () => {
       navigate('/login');
     } catch (error) {
       const message =
-        error.response?.data?.error?.message || 'Kayıt başarısız!';
+        error.userMessage || error.response?.data?.error?.message || 'Kayıt başarısız!';
       showToast(message, 'error');
     }
   };
 
   return (
-    <Container component="main" maxWidth="sm">
-      <Box
-        sx={{
-          marginTop: 4,
-          marginBottom: 4,
-          display: 'flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-        }}
-      >
-        <Paper elevation={3} sx={{ p: 4, width: '100%' }}>
-          <Typography component="h1" variant="h5" align="center" gutterBottom>
-            Kayıt Ol
-          </Typography>
+    <Box
+      sx={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: 'linear-gradient(135deg, #ff6b35 0%, #f7931e 30%, #004e89 70%, #1a6ba3 100%)',
+        py: 4,
+        position: 'relative',
+        overflow: 'hidden',
+        '&::before': {
+          content: '""',
+          position: 'absolute',
+          width: '200%',
+          height: '200%',
+          background: 'radial-gradient(circle, rgba(255,255,255,0.1) 1px, transparent 1px)',
+          backgroundSize: '50px 50px',
+          animation: 'float 20s infinite linear',
+          '@keyframes float': {
+            '0%': { transform: 'translate(0, 0)' },
+            '100%': { transform: 'translate(50px, 50px)' },
+          },
+        },
+      }}
+    >
+      <Container component="main" maxWidth="sm" sx={{ position: 'relative', zIndex: 1 }}>
+        <Box
+          sx={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+          }}
+        >
+          <Paper
+            elevation={24}
+            sx={{
+              p: 5,
+              width: '100%',
+              background: 'rgba(255, 255, 255, 0.95)',
+              backdropFilter: 'blur(10px)',
+              borderRadius: 4,
+              boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+            }}
+          >
+            <Box sx={{ textAlign: 'center', mb: 3 }}>
+              <Typography
+                component="h1"
+                variant="h4"
+                sx={{
+                  fontWeight: 700,
+                  background: 'linear-gradient(135deg, #ff6b35 0%, #004e89 100%)',
+                  WebkitBackgroundClip: 'text',
+                  WebkitTextFillColor: 'transparent',
+                  mb: 1,
+                }}
+              >
+                Kayıt Ol
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Yeni hesap oluşturun
+              </Typography>
+            </Box>
           <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ mt: 3 }}>
             <TextInput control={control} name="name" label="Ad Soyad" />
             <TextInput
@@ -161,15 +209,39 @@ const Register = () => {
               type="submit"
               fullWidth
               variant="contained"
-              sx={{ mt: 3, mb: 2 }}
+              size="large"
+              sx={{
+                mt: 4,
+                mb: 2,
+                py: 1.5,
+                fontSize: '1.1rem',
+                background: 'linear-gradient(135deg, #ff6b35 0%, #f7931e 50%, #004e89 100%)',
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #e55a2b 0%, #e0841a 50%, #003d6b 100%)',
+                  transform: 'translateY(-2px)',
+                  boxShadow: '0 10px 20px rgba(255, 107, 53, 0.4)',
+                },
+              }}
               disabled={isSubmitting}
             >
               {isSubmitting ? 'Kayıt yapılıyor...' : 'Kayıt Ol'}
             </Button>
-            <Box sx={{ textAlign: 'center', mt: 2 }}>
-              <Typography variant="body2">
+            <Box sx={{ textAlign: 'center', mt: 3 }}>
+              <Typography variant="body2" color="text.secondary">
                 Zaten hesabınız var mı?{' '}
-                <MuiLink component={Link} to="/login">
+                <MuiLink
+                  component={Link}
+                  to="/login"
+                  sx={{
+                    color: '#ff6b35',
+                    fontWeight: 600,
+                    textDecoration: 'none',
+                    '&:hover': {
+                      textDecoration: 'underline',
+                      color: '#004e89',
+                    },
+                  }}
+                >
                   Giriş Yap
                 </MuiLink>
               </Typography>
@@ -178,6 +250,7 @@ const Register = () => {
         </Paper>
       </Box>
     </Container>
+    </Box>
   );
 };
 

@@ -24,6 +24,44 @@ api.interceptors.request.use(
   }
 );
 
+// Helper function to get user-friendly error message
+const getErrorMessage = (error) => {
+  // Network error (backend not running or connection refused)
+  if (!error.response) {
+    if (error.code === 'ECONNREFUSED' || error.message.includes('Network Error')) {
+      return 'Backend sunucusuna bağlanılamıyor. Lütfen backend sunucusunun çalıştığından emin olun.';
+    }
+    if (error.code === 'ETIMEDOUT' || error.message.includes('timeout')) {
+      return 'Sunucuya bağlanırken zaman aşımı oluştu. Lütfen tekrar deneyin.';
+    }
+    return 'Sunucuya bağlanılamıyor. Lütfen internet bağlantınızı kontrol edin.';
+  }
+
+  // HTTP error responses
+  const status = error.response.status;
+  const message = error.response?.data?.error?.message || error.response?.data?.message;
+
+  if (message) {
+    return message;
+  }
+
+  // Default messages for common status codes
+  switch (status) {
+    case 400:
+      return 'Geçersiz istek. Lütfen bilgilerinizi kontrol edin.';
+    case 401:
+      return 'Giriş yapmanız gerekiyor.';
+    case 403:
+      return 'Bu işlem için yetkiniz yok.';
+    case 404:
+      return 'İstenen kaynak bulunamadı.';
+    case 500:
+      return 'Sunucu hatası oluştu. Lütfen daha sonra tekrar deneyin.';
+    default:
+      return 'Bir hata oluştu. Lütfen tekrar deneyin.';
+  }
+};
+
 // Response interceptor - Handle token refresh
 api.interceptors.response.use(
   (response) => {
@@ -62,6 +100,8 @@ api.interceptors.response.use(
       }
     }
 
+    // Enhance error with user-friendly message
+    error.userMessage = getErrorMessage(error);
     return Promise.reject(error);
   }
 );
