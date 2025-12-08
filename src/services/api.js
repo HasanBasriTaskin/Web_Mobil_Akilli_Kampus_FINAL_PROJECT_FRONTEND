@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5150/api/v1';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api/v1';
 
 // Create axios instance
 const api = axios.create({
@@ -15,8 +15,10 @@ api.interceptors.request.use(
   (config) => {
     // Public endpoints that don't require authentication
     const publicEndpoints = [
+      '/Auth/login',
       '/Auth/register',
       '/Auth/forgot-password',
+      '/Auth/verify-email',
     ];
     
     // Check if this is a public endpoint
@@ -26,10 +28,10 @@ api.interceptors.request.use(
     
     // Only add token if it's not a public endpoint
     if (!isPublicEndpoint) {
-      const token = localStorage.getItem('accessToken');
-      if (token) {
-        config.headers.Authorization = `Bearer ${token}`;
-      }
+    const token = localStorage.getItem('accessToken');
+    if (token) {
+      config.headers.Authorization = `Bearer ${token}`;
+    }
     }
     
     return config;

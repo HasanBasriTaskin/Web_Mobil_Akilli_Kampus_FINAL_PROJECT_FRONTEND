@@ -43,9 +43,14 @@ const Login = () => {
 
   const onSubmit = async (data) => {
     try {
-    const result = await login(data.email, data.password);
-    if (result.success) {
-      navigate('/dashboard');
+      const result = await login(data.email, data.password);
+      if (result.success) {
+        navigate('/dashboard');
+      } else if (result.requiresEmailVerification) {
+        // Email doğrulanmamışsa, kullanıcıyı bilgilendir
+        showToast('Lütfen email adresinizi doğrulayın. Email doğrulama linki kayıt sırasında gönderilmiştir.', 'warning');
+        // İsteğe bağlı: Email doğrulama sayfasına yönlendir
+        // navigate('/verify-email');
       }
     } catch (error) {
       console.error('Login error:', error);

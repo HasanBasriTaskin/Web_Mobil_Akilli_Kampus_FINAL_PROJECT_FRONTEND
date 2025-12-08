@@ -52,12 +52,24 @@ const EmailVerification = () => {
         console.error('EmailVerification - error:', error);
         console.error('EmailVerification - error.response:', error.response);
         setStatus('error');
+        
+        // Network error kontrolü
+        if (!error.response) {
+          const networkMessage = error.code === 'ECONNREFUSED' || error.message.includes('Network Error')
+            ? 'Backend sunucusuna bağlanılamıyor. Lütfen backend sunucusunun çalıştığından emin olun.'
+            : 'Sunucuya bağlanılamıyor. Lütfen internet bağlantınızı kontrol edin.';
+          showToast(networkMessage, 'error');
+          return;
+        }
+        
+        // Backend'den gelen hata mesajı
+        const errorData = error.response?.data;
         const message =
           error.userMessage ||
-          error.response?.data?.errors?.[0] ||
-          error.response?.data?.Errors?.[0] ||
-          error.response?.data?.error?.message ||
-          error.response?.data?.message ||
+          errorData?.errors?.[0] ||
+          errorData?.Errors?.[0] ||
+          errorData?.error?.message ||
+          errorData?.message ||
           error.message ||
           'Doğrulama başarısız! Lütfen linkin tamamını kopyaladığınızdan emin olun.';
         showToast(message, 'error');
