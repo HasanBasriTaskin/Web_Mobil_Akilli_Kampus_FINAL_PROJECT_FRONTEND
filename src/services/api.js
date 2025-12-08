@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api/v1';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5150/api/v1';
 
 // Create axios instance
 const api = axios.create({
@@ -90,12 +90,72 @@ const getErrorMessage = (error) => {
   }
 };
 
-// Response interceptor - Handle errors
+// Response interceptor - Handle errors and refresh token
 api.interceptors.response.use(
   (response) => {
     return response;
   },
   async (error) => {
+    const originalRequest = error.config;
+
+    // If error is 401 and we haven't already retried
+    if (error.response?.status === 401 && !originalRequest._retry) {
+      originalRequest._retry = true;
+
+      const refreshToken = localStorage.getItem('refreshToken');
+      
+      // Don't try to refresh if we're on a public endpoint or if there's no refresh token
+      const publicEndpoints = [
+        '/Auth/login',
+        '/Auth/register',
+        '/Auth/forgot-password',
+        '/Auth/verify-email',
+        '/Auth/refresh-token',
+      ];
+      
+      const isPublicEndpoint = publicEndpoints.some(endpoint => 
+        originalRequest.url?.includes(endpoint)
+      );
+
+      if (!isPublicEndpoint && refreshToken) {
+        try {
+          // Try to refresh the token
+          const response = await axios.post(
+            `${API_BASE_URL}/Auth/refresh-token`,
+            { token: refreshToken }
+          );
+
+          const newAccessToken = response?.data?.Data?.AccessToken || 
+                                response?.data?.data?.accessToken ||
+                                response?.data?.AccessToken ||
+                                response?.data?.accessToken;
+
+          if (newAccessToken) {
+            // Update token in localStorage
+            localStorage.setItem('accessToken', newAccessToken);
+            
+            // Update the authorization header
+            originalRequest.headers.Authorization = `Bearer ${newAccessToken}`;
+            
+            // Retry the original request
+            return api(originalRequest);
+          }
+        } catch (refreshError) {
+          // Refresh failed, logout user
+          console.error('Token refresh failed:', refreshError);
+          localStorage.removeItem('accessToken');
+          localStorage.removeItem('refreshToken');
+          
+          // Redirect to login if not already there
+          if (window.location.pathname !== '/login') {
+            window.location.href = '/login';
+          }
+          
+          return Promise.reject(refreshError);
+        }
+      }
+    }
+
     // Enhance error with user-friendly message
     error.userMessage = getErrorMessage(error);
     return Promise.reject(error);

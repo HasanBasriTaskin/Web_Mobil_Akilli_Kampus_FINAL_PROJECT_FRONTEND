@@ -39,9 +39,10 @@ const Sidebar = () => {
   ];
 
   // Filter menu items based on user role
-  const filteredMenuItems = menuItems.filter((item) =>
-    item.roles.includes(user?.role)
-  );
+  // If user role is not available, show all items for development
+  const filteredMenuItems = user?.role 
+    ? menuItems.filter((item) => item.roles.includes(user.role))
+    : menuItems;
 
   return (
     <Drawer

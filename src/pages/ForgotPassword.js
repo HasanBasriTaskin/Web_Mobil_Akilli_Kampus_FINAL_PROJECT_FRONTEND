@@ -40,8 +40,8 @@ const ForgotPassword = () => {
       
       // Backend response format: { data, isSuccessful, errors } (camelCase)
       if (response?.isSuccessful || response?.IsSuccessful) {
-        setIsSubmitted(true);
-        showToast('Şifre sıfırlama linki email adresinize gönderildi', 'success');
+      setIsSubmitted(true);
+      showToast('Şifre sıfırlama linki email adresinize gönderildi', 'success');
       } else {
         const errorMessage = response?.errors?.[0] || response?.Errors?.[0] || 'Bir hata oluştu!';
         throw new Error(errorMessage);

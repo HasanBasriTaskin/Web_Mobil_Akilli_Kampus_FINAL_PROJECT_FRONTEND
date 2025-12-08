@@ -217,11 +217,28 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
-  const logout = () => {
-    localStorage.removeItem('accessToken');
-    localStorage.removeItem('refreshToken');
-    dispatch({ type: AUTH_ACTIONS.LOGOUT });
-    showToast('Çıkış yapıldı', 'info');
+  const logout = async () => {
+    try {
+      const refreshToken = state.refreshToken || localStorage.getItem('refreshToken');
+      
+      // Call logout API to invalidate refresh token
+      if (refreshToken) {
+        try {
+          await authService.logout(refreshToken);
+        } catch (error) {
+          // Even if API call fails, continue with local logout
+          console.error('Logout API error:', error);
+        }
+      }
+    } catch (error) {
+      console.error('Logout error:', error);
+    } finally {
+      // Always clear local storage and state
+      localStorage.removeItem('accessToken');
+      localStorage.removeItem('refreshToken');
+      dispatch({ type: AUTH_ACTIONS.LOGOUT });
+      showToast('Çıkış yapıldı', 'success');
+    }
   };
 
   const value = {

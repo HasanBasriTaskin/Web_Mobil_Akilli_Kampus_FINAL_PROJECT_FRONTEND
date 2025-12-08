@@ -12,10 +12,13 @@ import {
 import {
   AccountCircle,
   Person,
+  Logout,
 } from '@mui/icons-material';
+import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
   const navigate = useNavigate();
+  const { user, logout } = useAuth();
   const [anchorEl, setAnchorEl] = useState(null);
 
   const handleMenuOpen = (event) => {
@@ -29,6 +32,12 @@ const Navbar = () => {
   const handleProfile = () => {
     handleMenuClose();
     navigate('/profile');
+  };
+
+  const handleLogout = async () => {
+    handleMenuClose();
+    await logout();
+    navigate('/login');
   };
 
   return (
@@ -65,6 +74,34 @@ const Navbar = () => {
         </Typography>
         
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          {user && (
+            <Box sx={{ display: { xs: 'none', md: 'flex' }, flexDirection: 'column', alignItems: 'flex-end', mr: 1 }}>
+              <Typography
+                variant="body2"
+                sx={{
+                  color: 'white',
+                  fontWeight: 600,
+                  fontSize: '0.95rem',
+                }}
+              >
+                {user.fullName || user.name || user.email}
+              </Typography>
+              {user.role && (
+                <Typography
+                  variant="caption"
+                  sx={{
+                    color: 'rgba(255, 255, 255, 0.8)',
+                    fontSize: '0.75rem',
+                    textTransform: 'capitalize',
+                  }}
+                >
+                  {user.role === 'Student' ? 'Öğrenci' : 
+                   user.role === 'Faculty' ? 'Öğretim Üyesi' : 
+                   user.role === 'Admin' ? 'Yönetici' : user.role}
+                </Typography>
+              )}
+            </Box>
+          )}
           <IconButton
             size="large"
             onClick={handleMenuOpen}
@@ -104,6 +141,18 @@ const Navbar = () => {
               }}
             >
               <Person sx={{ mr: 1 }} /> Profilim
+            </MenuItem>
+            <MenuItem
+              onClick={handleLogout}
+              sx={{
+                '&:hover': {
+                  background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
+                  color: 'white',
+                },
+                transition: 'all 0.3s ease',
+              }}
+            >
+              <Logout sx={{ mr: 1 }} /> Çıkış Yap
             </MenuItem>
           </Menu>
         </Box>

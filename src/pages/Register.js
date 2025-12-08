@@ -58,7 +58,6 @@ const schema = yup.object({
       if (value === '' || value == null) return undefined;
       return Number(value);
     }),
-  terms: yup.boolean().oneOf([true], 'Kullanım şartlarını kabul etmelisiniz'),
 });
 
 const Register = () => {
@@ -83,7 +82,6 @@ const Register = () => {
       title: '',
       officeLocation: '',
       departmentId: '',
-      terms: false,
     },
   });
 
@@ -277,16 +275,6 @@ const Register = () => {
               label="Şifre Tekrar"
               type="password"
               autoComplete="new-password"
-            />
-            <Controller
-              name="terms"
-              control={control}
-              render={({ field, fieldState: { error } }) => (
-                <FormControlLabel
-                  control={<Checkbox {...field} checked={field.value} color="primary" />}
-                  label="Kullanım şartlarını kabul ediyorum"
-                />
-              )}
             />
             <Button
               type="submit"
