@@ -36,12 +36,26 @@ const ForgotPassword = () => {
 
   const onSubmit = async (data) => {
     try {
-      await authService.forgotPassword(data.email);
-      setIsSubmitted(true);
-      showToast('Şifre sıfırlama linki email adresinize gönderildi', 'success');
+      const response = await authService.forgotPassword(data.email);
+      
+      // Backend response format: { data, isSuccessful, errors } (camelCase)
+      if (response?.isSuccessful || response?.IsSuccessful) {
+        setIsSubmitted(true);
+        showToast('Şifre sıfırlama linki email adresinize gönderildi', 'success');
+      } else {
+        const errorMessage = response?.errors?.[0] || response?.Errors?.[0] || 'Bir hata oluştu!';
+        throw new Error(errorMessage);
+      }
     } catch (error) {
+      const responseData = error.response?.data || {};
       const message =
-        error.response?.data?.error?.message || 'Bir hata oluştu!';
+        error.userMessage ||
+        responseData?.errors?.[0] ||
+        responseData?.Errors?.[0] ||
+        responseData?.error?.message ||
+        responseData?.message ||
+        error.message ||
+        'Bir hata oluştu!';
       showToast(message, 'error');
     }
   };
@@ -97,7 +111,7 @@ const ForgotPassword = () => {
               </Typography>
               <Button
                 component={Link}
-                to="/login"
+                to="/register"
                 variant="contained"
                 fullWidth
                 size="large"
@@ -112,7 +126,7 @@ const ForgotPassword = () => {
                 },
                 }}
               >
-                Giriş Sayfasına Dön
+                Kayıt Sayfasına Dön
               </Button>
             </Paper>
           </Box>
@@ -216,7 +230,7 @@ const ForgotPassword = () => {
               <Box sx={{ textAlign: 'center', mt: 3 }}>
                 <MuiLink
                   component={Link}
-                  to="/login"
+                  to="/register"
                   variant="body2"
                   sx={{
                     color: '#ff6b35',
@@ -227,7 +241,7 @@ const ForgotPassword = () => {
                     },
                   }}
                 >
-                  Giriş sayfasına dön
+                  Kayıt sayfasına dön
                 </MuiLink>
               </Box>
             </Box>

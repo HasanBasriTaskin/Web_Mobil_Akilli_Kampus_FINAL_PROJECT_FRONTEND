@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, useParams } from 'react-router-dom';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import * as yup from 'yup';
@@ -28,10 +28,13 @@ const schema = yup.object({
 });
 
 const ResetPassword = () => {
-  const { token } = useParams();
+  const [searchParams] = useSearchParams();
   const navigate = useNavigate();
   const { showToast } = useToast();
   const [isSuccess, setIsSuccess] = useState(false);
+
+  const email = searchParams.get('email');
+  const token = searchParams.get('token');
 
   const {
     control,
@@ -46,16 +49,35 @@ const ResetPassword = () => {
   });
 
   const onSubmit = async (data) => {
+    if (!email || !token) {
+      showToast('Geçersiz şifre sıfırlama linki! Email veya token eksik.', 'error');
+      return;
+    }
+
     try {
-      await authService.resetPassword(token, data.password);
+      const response = await authService.resetPassword(email, token, data.password, data.confirmPassword);
+      
+      // Backend response format: { data, isSuccessful, errors }
+      if (response?.isSuccessful || response?.IsSuccessful) {
       setIsSuccess(true);
       showToast('Şifreniz başarıyla değiştirildi', 'success');
       setTimeout(() => {
         navigate('/login');
       }, 2000);
+      } else {
+        const errorMessage = response?.errors?.[0] || response?.Errors?.[0] || 'Şifre sıfırlama başarısız!';
+        throw new Error(errorMessage);
+      }
     } catch (error) {
+      const responseData = error.response?.data || {};
       const message =
-        error.response?.data?.error?.message || 'Şifre sıfırlama başarısız!';
+        error.userMessage ||
+        responseData?.errors?.[0] ||
+        responseData?.Errors?.[0] ||
+        responseData?.error?.message ||
+        responseData?.message ||
+        error.message ||
+        'Şifre sıfırlama başarısız!';
       showToast(message, 'error');
     }
   };

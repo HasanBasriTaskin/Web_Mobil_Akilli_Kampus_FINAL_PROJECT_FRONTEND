@@ -19,7 +19,7 @@ import TextInput from '../components/TextInput';
 import SelectInput from '../components/SelectInput';
 
 const schema = yup.object({
-  name: yup.string().required('Ad Soyad zorunludur'),
+  fullName: yup.string().required('Ad Soyad zorunludur'),
   email: yup.string().email('Geçerli bir email giriniz').required('Email zorunludur'),
   password: yup
     .string()
@@ -33,10 +33,31 @@ const schema = yup.object({
     .required('Şifre tekrarı zorunludur'),
   userType: yup.string().required('Kullanıcı tipi seçiniz'),
   studentNumber: yup.string().when('userType', {
-    is: 'student',
+    is: 'Student',
     then: (schema) => schema.required('Öğrenci numarası zorunludur'),
   }),
-  departmentId: yup.string().required('Bölüm seçiniz'),
+  employeeNumber: yup.string().when('userType', {
+    is: 'Faculty',
+    then: (schema) => schema.required('Personel numarası zorunludur'),
+  }),
+  title: yup.string().when('userType', {
+    is: 'Faculty',
+    then: (schema) => schema.required('Ünvan zorunludur'),
+  }),
+  officeLocation: yup.string().when('userType', {
+    is: 'Faculty',
+    then: (schema) => schema.required('Ofis konumu zorunludur'),
+  }),
+  departmentId: yup
+    .mixed()
+    .required('Bölüm seçiniz')
+    .test('is-valid-department', 'Bölüm seçiniz', (value) => {
+      return value !== '' && value != null && !isNaN(Number(value));
+    })
+    .transform((value) => {
+      if (value === '' || value == null) return undefined;
+      return Number(value);
+    }),
   terms: yup.boolean().oneOf([true], 'Kullanım şartlarını kabul etmelisiniz'),
 });
 
@@ -52,12 +73,15 @@ const Register = () => {
   } = useForm({
     resolver: yupResolver(schema),
     defaultValues: {
-      name: '',
+      fullName: '',
       email: '',
       password: '',
       confirmPassword: '',
       userType: '',
       studentNumber: '',
+      employeeNumber: '',
+      title: '',
+      officeLocation: '',
       departmentId: '',
       terms: false,
     },
@@ -67,22 +91,59 @@ const Register = () => {
 
   // Mock departments - backend'den gelecek
   const departments = [
-    { value: '1', label: 'Bilgisayar Mühendisliği' },
-    { value: '2', label: 'Elektrik-Elektronik Mühendisliği' },
-    { value: '3', label: 'Endüstri Mühendisliği' },
+    { value: 1, label: 'Bilgisayar Mühendisliği' },
+    { value: 2, label: 'Elektrik-Elektronik Mühendisliği' },
+    { value: 3, label: 'Endüstri Mühendisliği' },
+    { value: 4, label: 'Makine Mühendisliği' },
+    { value: 5, label: 'İnşaat Mühendisliği' },
   ];
 
   const onSubmit = async (data) => {
     try {
-      await authService.register(data);
-      showToast(
-        'Kayıt başarılı! Lütfen email adresinizi doğrulayın.',
-        'success'
-      );
-      navigate('/login');
+      // Validation: departmentId kontrolü
+      if (!data.departmentId || data.departmentId === '' || isNaN(Number(data.departmentId))) {
+        showToast('Lütfen bir bölüm seçiniz', 'error');
+        return;
+      }
+
+      // Backend'e gönderilecek format
+      const registerData = {
+        userType: data.userType, // 'Student' veya 'Faculty'
+        fullName: data.fullName,
+        email: data.email,
+        password: data.password,
+        confirmPassword: data.confirmPassword,
+        departmentId: Number(data.departmentId),
+        ...(data.userType === 'Student' && { studentNumber: data.studentNumber }),
+        ...(data.userType === 'Faculty' && {
+          employeeNumber: data.employeeNumber,
+          title: data.title,
+          officeLocation: data.officeLocation,
+        }),
+      };
+
+      const response = await authService.register(registerData);
+      
+      // Backend response format: { data, isSuccessful, errors } (camelCase)
+      if (response?.isSuccessful || response?.IsSuccessful) {
+        showToast(
+          'Kayıt başarılı! Email doğrulama linki gönderildi.',
+          'success'
+        );
+        // Stay on register page after successful registration
+      } else {
+        const errorMessage = response?.errors?.[0] || response?.Errors?.[0] || 'Kayıt başarısız!';
+        throw new Error(errorMessage);
+      }
     } catch (error) {
       const message =
-        error.userMessage || error.response?.data?.error?.message || 'Kayıt başarısız!';
+        error.userMessage || 
+        error.response?.data?.errors?.[0] ||
+        error.response?.data?.Errors?.[0] || 
+        error.response?.data?.message ||
+        error.response?.data?.Message ||
+        error.message || 
+        'Kayıt başarısız!';
       showToast(message, 'error');
     }
   };
@@ -151,7 +212,7 @@ const Register = () => {
               </Typography>
             </Box>
           <Box component="form" onSubmit={handleSubmit(onSubmit)} sx={{ mt: 3 }}>
-            <TextInput control={control} name="name" label="Ad Soyad" />
+            <TextInput control={control} name="fullName" label="Ad Soyad" />
             <TextInput
               control={control}
               name="email"
@@ -164,22 +225,44 @@ const Register = () => {
               name="userType"
               label="Kullanıcı Tipi"
               options={[
-                { value: 'student', label: 'Öğrenci' },
-                { value: 'faculty', label: 'Öğretim Üyesi' },
+                { value: 'Student', label: 'Öğrenci' },
+                { value: 'Faculty', label: 'Öğretim Üyesi' },
               ]}
             />
-            {userType === 'student' && (
+            {userType === 'Student' && (
               <TextInput
                 control={control}
                 name="studentNumber"
                 label="Öğrenci Numarası"
               />
             )}
+            {userType === 'Faculty' && (
+              <>
+                <TextInput
+                  control={control}
+                  name="employeeNumber"
+                  label="Personel Numarası"
+                />
+                <TextInput
+                  control={control}
+                  name="title"
+                  label="Ünvan"
+                  placeholder="Örn: Prof. Dr., Doç. Dr., Dr. Öğr. Üyesi"
+                />
+                <TextInput
+                  control={control}
+                  name="officeLocation"
+                  label="Ofis Konumu"
+                  placeholder="Örn: B-Block 301"
+                />
+              </>
+            )}
             <SelectInput
               control={control}
               name="departmentId"
               label="Bölüm"
               options={departments}
+              displayEmpty
             />
             <TextInput
               control={control}
@@ -227,24 +310,22 @@ const Register = () => {
               {isSubmitting ? 'Kayıt yapılıyor...' : 'Kayıt Ol'}
             </Button>
             <Box sx={{ textAlign: 'center', mt: 3 }}>
-              <Typography variant="body2" color="text.secondary">
-                Zaten hesabınız var mı?{' '}
-                <MuiLink
-                  component={Link}
-                  to="/login"
-                  sx={{
-                    color: '#ff6b35',
-                    fontWeight: 600,
-                    textDecoration: 'none',
-                    '&:hover': {
-                      textDecoration: 'underline',
-                      color: '#004e89',
-                    },
-                  }}
-                >
-                  Giriş Yap
-                </MuiLink>
-              </Typography>
+              <MuiLink
+                component={Link}
+                to="/forgot-password"
+                variant="body2"
+                sx={{
+                  color: '#ff6b35',
+                  fontWeight: 600,
+                  textDecoration: 'none',
+                  '&:hover': {
+                    textDecoration: 'underline',
+                    color: '#004e89',
+                  },
+                }}
+              >
+                Şifremi Unuttum
+              </MuiLink>
             </Box>
           </Box>
         </Paper>

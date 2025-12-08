@@ -42,9 +42,13 @@ const Login = () => {
   });
 
   const onSubmit = async (data) => {
+    try {
     const result = await login(data.email, data.password);
     if (result.success) {
       navigate('/dashboard');
+      }
+    } catch (error) {
+      console.error('Login error:', error);
     }
   };
 

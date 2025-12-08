@@ -1,6 +1,6 @@
 import axios from 'axios';
 
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api/v1';
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5150/api/v1';
 
 // Create axios instance
 const api = axios.create({
@@ -10,13 +10,28 @@ const api = axios.create({
   },
 });
 
-// Request interceptor - Add token to headers
+// Request interceptor - Add token to headers (except for public endpoints)
 api.interceptors.request.use(
   (config) => {
-    const token = localStorage.getItem('accessToken');
-    if (token) {
-      config.headers.Authorization = `Bearer ${token}`;
+    // Public endpoints that don't require authentication
+    const publicEndpoints = [
+      '/Auth/register',
+      '/Auth/forgot-password',
+    ];
+    
+    // Check if this is a public endpoint
+    const isPublicEndpoint = publicEndpoints.some(endpoint => 
+      config.url?.includes(endpoint)
+    );
+    
+    // Only add token if it's not a public endpoint
+    if (!isPublicEndpoint) {
+      const token = localStorage.getItem('accessToken');
+      if (token) {
+        config.headers.Authorization = `Bearer ${token}`;
+      }
     }
+    
     return config;
   },
   (error) => {
@@ -39,7 +54,18 @@ const getErrorMessage = (error) => {
 
   // HTTP error responses
   const status = error.response.status;
-  const message = error.response?.data?.error?.message || error.response?.data?.message;
+  const responseData = error.response?.data || {};
+  
+  // Handle backend response format (both camelCase and PascalCase)
+  const errors = responseData?.errors || responseData?.Errors;
+  if (errors && Array.isArray(errors) && errors.length > 0) {
+    return errors[0];
+  }
+  
+  const message = responseData?.error?.message || 
+                  responseData?.Error?.Message || 
+                  responseData?.message || 
+                  responseData?.Message;
 
   if (message) {
     return message;
@@ -62,44 +88,12 @@ const getErrorMessage = (error) => {
   }
 };
 
-// Response interceptor - Handle token refresh
+// Response interceptor - Handle errors
 api.interceptors.response.use(
   (response) => {
     return response;
   },
   async (error) => {
-    const originalRequest = error.config;
-
-    // If error is 401 and we haven't already tried to refresh
-    if (error.response?.status === 401 && !originalRequest._retry) {
-      originalRequest._retry = true;
-
-      try {
-        const refreshToken = localStorage.getItem('refreshToken');
-        if (!refreshToken) {
-          throw new Error('No refresh token');
-        }
-
-        const response = await axios.post(`${API_BASE_URL}/auth/refresh-token`, {
-          refreshToken,
-        });
-
-        const { accessToken } = response.data.data;
-        localStorage.setItem('accessToken', accessToken);
-
-        // Retry original request with new token
-        originalRequest.headers.Authorization = `Bearer ${accessToken}`;
-        return api(originalRequest);
-      } catch (refreshError) {
-        // Refresh failed, logout user
-        localStorage.removeItem('accessToken');
-        localStorage.removeItem('refreshToken');
-        localStorage.removeItem('user');
-        window.location.href = '/login';
-        return Promise.reject(refreshError);
-      }
-    }
-
     // Enhance error with user-friendly message
     error.userMessage = getErrorMessage(error);
     return Promise.reject(error);

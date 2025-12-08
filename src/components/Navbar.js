@@ -4,23 +4,18 @@ import {
   AppBar,
   Toolbar,
   Typography,
-  Button,
   IconButton,
   Menu,
   MenuItem,
-  Avatar,
   Box,
 } from '@mui/material';
 import {
   AccountCircle,
-  Logout,
   Person,
 } from '@mui/icons-material';
-import { useAuth } from '../context/AuthContext';
 
 const Navbar = () => {
   const navigate = useNavigate();
-  const { user, logout } = useAuth();
   const [anchorEl, setAnchorEl] = useState(null);
 
   const handleMenuOpen = (event) => {
@@ -29,12 +24,6 @@ const Navbar = () => {
 
   const handleMenuClose = () => {
     setAnchorEl(null);
-  };
-
-  const handleLogout = async () => {
-    handleMenuClose();
-    await logout();
-    navigate('/login');
   };
 
   const handleProfile = () => {
@@ -75,87 +64,49 @@ const Navbar = () => {
           </Link>
         </Typography>
         
-        {user && (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-            <Typography
-              variant="body2"
-              sx={{
-                fontWeight: 500,
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+          <IconButton
+            size="large"
+            onClick={handleMenuOpen}
+            sx={{
+              color: 'white',
+              background: 'rgba(255, 255, 255, 0.1)',
+              '&:hover': {
                 background: 'rgba(255, 255, 255, 0.2)',
-                px: 2,
-                py: 0.5,
+                transform: 'scale(1.1)',
+              },
+              transition: 'all 0.3s ease',
+            }}
+          >
+            <AccountCircle sx={{ fontSize: 32 }} />
+          </IconButton>
+          <Menu
+            anchorEl={anchorEl}
+            open={Boolean(anchorEl)}
+            onClose={handleMenuClose}
+            PaperProps={{
+              sx: {
                 borderRadius: 2,
-                backdropFilter: 'blur(10px)',
-              }}
-            >
-              {user.name || user.email}
-            </Typography>
-            <IconButton
-              size="large"
-              onClick={handleMenuOpen}
+                mt: 1,
+                minWidth: 200,
+                boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+              },
+            }}
+          >
+            <MenuItem
+              onClick={handleProfile}
               sx={{
-                color: 'white',
-                background: 'rgba(255, 255, 255, 0.1)',
                 '&:hover': {
-                  background: 'rgba(255, 255, 255, 0.2)',
-                  transform: 'scale(1.1)',
+                  background: 'linear-gradient(135deg, #ff6b35 0%, #f7931e 100%)',
+                  color: 'white',
                 },
                 transition: 'all 0.3s ease',
               }}
             >
-              {user.profilePictureUrl ? (
-                <Avatar
-                  src={user.profilePictureUrl}
-                  sx={{
-                    width: 36,
-                    height: 36,
-                    border: '2px solid rgba(255, 255, 255, 0.3)',
-                  }}
-                />
-              ) : (
-                <AccountCircle sx={{ fontSize: 32 }} />
-              )}
-            </IconButton>
-            <Menu
-              anchorEl={anchorEl}
-              open={Boolean(anchorEl)}
-              onClose={handleMenuClose}
-              PaperProps={{
-                sx: {
-                  borderRadius: 2,
-                  mt: 1,
-                  minWidth: 200,
-                  boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
-                },
-              }}
-            >
-              <MenuItem
-                onClick={handleProfile}
-                sx={{
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #ff6b35 0%, #f7931e 100%)',
-                    color: 'white',
-                  },
-                  transition: 'all 0.3s ease',
-                }}
-              >
-                <Person sx={{ mr: 1 }} /> Profilim
-              </MenuItem>
-              <MenuItem
-                onClick={handleLogout}
-                sx={{
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #004e89 0%, #1a6ba3 100%)',
-                    color: 'white',
-                  },
-                  transition: 'all 0.3s ease',
-                }}
-              >
-                <Logout sx={{ mr: 1 }} /> Çıkış Yap
-              </MenuItem>
-            </Menu>
-          </Box>
-        )}
+              <Person sx={{ mr: 1 }} /> Profilim
+            </MenuItem>
+          </Menu>
+        </Box>
       </Toolbar>
     </AppBar>
   );

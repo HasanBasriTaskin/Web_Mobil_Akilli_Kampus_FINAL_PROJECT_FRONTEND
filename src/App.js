@@ -6,11 +6,8 @@ import { AuthProvider } from './context/AuthContext';
 import { ToastProvider } from './context/ToastContext';
 
 // Pages
-import Login from './pages/Login';
 import Register from './pages/Register';
 import ForgotPassword from './pages/ForgotPassword';
-import EmailVerification from './pages/EmailVerification';
-import ResetPassword from './pages/ResetPassword';
 import Dashboard from './pages/Dashboard';
 import Profile from './pages/Profile';
 import NotFound from './pages/NotFound';
@@ -151,11 +148,8 @@ function App() {
           <Router>
             <Routes>
               {/* Public Routes */}
-              <Route path="/login" element={<Login />} />
               <Route path="/register" element={<Register />} />
               <Route path="/forgot-password" element={<ForgotPassword />} />
-              <Route path="/verify-email/:token" element={<EmailVerification />} />
-              <Route path="/reset-password/:token" element={<ResetPassword />} />
               
               {/* Protected Routes */}
               <Route
@@ -176,7 +170,7 @@ function App() {
               />
               
               {/* Default redirect */}
-              <Route path="/" element={<Navigate to="/dashboard" replace />} />
+              <Route path="/" element={<Navigate to="/register" replace />} />
               
               {/* 404 */}
               <Route path="*" element={<NotFound />} />
