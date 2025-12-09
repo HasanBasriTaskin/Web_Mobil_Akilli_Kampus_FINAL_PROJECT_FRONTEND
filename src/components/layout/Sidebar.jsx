@@ -110,8 +110,8 @@ export function Sidebar({ isOpen, onClose }) {
             {/* Sidebar */}
             <aside
                 className={cn(
-                    "fixed lg:sticky top-0 left-0 z-50 lg:z-30 h-screen w-64 bg-white dark:bg-slate-900 border-r border-border flex flex-col transition-transform duration-300",
-                    isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+                    "fixed left-0 z-50 lg:z-30 h-screen lg:h-[calc(100vh-4rem)] lg:top-16 w-64 bg-white dark:bg-slate-900 border-r border-border flex flex-col transition-transform duration-300",
+                    isOpen ? "translate-x-0 top-0" : "-translate-x-full lg:translate-x-0"
                 )}
             >
                 {/* Mobile close button */}
@@ -122,11 +122,9 @@ export function Sidebar({ isOpen, onClose }) {
                     </button>
                 </div>
 
-                {/* Desktop spacer (same height as navbar) */}
-                <div className="hidden lg:block h-16" />
-
                 {/* Navigation */}
                 <nav className="flex-1 overflow-y-auto p-4">
+
                     <ul className="space-y-1">
                         {filteredNavItems.map((item) => {
                             const isActive = pathname === item.href;
