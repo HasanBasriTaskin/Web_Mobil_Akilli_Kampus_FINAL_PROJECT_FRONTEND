@@ -30,7 +30,7 @@ import {
 } from '@/components/ui/form';
 
 import { profileSchema, profileDefaultValues } from '@/schemas/profile.schema';
-import { updateProfile } from '@/services/user.service';
+import { updateProfile, getProfile } from '@/services/user.service';
 import { useAuthStore } from '@/stores/auth.store';
 import { ProfilePictureUpload } from '@/components/profile/ProfilePictureUpload';
 
@@ -41,6 +41,34 @@ import { ProfilePictureUpload } from '@/components/profile/ProfilePictureUpload'
 export default function ProfilePage() {
     const { user, setUser } = useAuthStore();
     const [isLoading, setIsLoading] = useState(false);
+    const [isPageLoading, setIsPageLoading] = useState(true);
+
+    // Sayfa yüklendiğinde API'den güncel kullanıcı verilerini çek
+    useEffect(() => {
+        async function fetchUserProfile() {
+            try {
+                const response = await getProfile();
+                if (response.success && response.data) {
+                    // Boş veya null alanları önceki değerlerle doldur
+                    const newUserData = response.data;
+                    const mergedUser = {
+                        ...user, // Önceki değerler
+                        ...Object.fromEntries(
+                            Object.entries(newUserData).filter(([_, v]) => v != null && v !== '')
+                        ),
+                    };
+                    setUser(mergedUser);
+                }
+            } catch (error) {
+                console.error('Profil yüklenirken hata:', error);
+            } finally {
+                setIsPageLoading(false);
+            }
+        }
+
+        fetchUserProfile();
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
     const form = useForm({
         resolver: zodResolver(profileSchema),
@@ -100,7 +128,7 @@ export default function ProfilePage() {
         });
     };
 
-    if (!user) {
+    if (!user || isPageLoading) {
         return (
             <div className="flex items-center justify-center py-12">
                 <Loader2 className="size-8 animate-spin text-primary" />

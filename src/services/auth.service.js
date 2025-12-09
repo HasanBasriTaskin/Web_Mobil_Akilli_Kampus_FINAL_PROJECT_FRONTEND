@@ -94,7 +94,8 @@ export async function logout() {
             ? localStorage.getItem('refreshToken')
             : null;
 
-        await post('/auth/logout', { refreshToken });
+        // Backend RefreshTokenDto { Token: string } bekliyor
+        await post('/auth/logout', { token: refreshToken });
     } finally {
         // Her durumda local verileri temizle
         if (typeof window !== 'undefined') {
