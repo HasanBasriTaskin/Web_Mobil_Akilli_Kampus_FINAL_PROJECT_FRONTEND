@@ -1,0 +1,154 @@
+/**
+ * API Client - Fetch Wrapper
+ * SOLID: Single Responsibility - Sadece HTTP isteklerini yönetir
+ */
+
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
+
+/**
+ * API isteği gönderir
+ * @param {string} endpoint - API endpoint'i
+ * @param {object} options - Fetch options
+ * @returns {Promise<object>} API yanıtı
+ */
+async function request(endpoint, options = {}) {
+    const url = `${API_BASE_URL}${endpoint}`;
+
+    const config = {
+        headers: {
+            'Content-Type': 'application/json',
+            ...options.headers,
+        },
+        ...options,
+    };
+
+    // Token varsa header'a ekle
+    if (typeof window !== 'undefined') {
+        const token = localStorage.getItem('accessToken');
+        if (token) {
+            config.headers.Authorization = `Bearer ${token}`;
+        }
+    }
+
+    try {
+        const response = await fetch(url, config);
+        const data = await response.json();
+
+        if (!response.ok) {
+            // API hata yanıtı
+            const error = new Error(data.message || 'Bir hata oluştu');
+            error.status = response.status;
+            error.data = data;
+            throw error;
+        }
+
+        return data;
+    } catch (error) {
+        // Network hatası veya JSON parse hatası
+        if (!error.status) {
+            error.message = 'Sunucuya bağlanılamadı. Lütfen internet bağlantınızı kontrol edin.';
+            error.status = 0;
+        }
+        throw error;
+    }
+}
+
+/**
+ * GET isteği
+ * @param {string} endpoint 
+ * @param {object} options 
+ * @returns {Promise<object>}
+ */
+export function get(endpoint, options = {}) {
+    return request(endpoint, { ...options, method: 'GET' });
+}
+
+/**
+ * POST isteği
+ * @param {string} endpoint 
+ * @param {object} body 
+ * @param {object} options 
+ * @returns {Promise<object>}
+ */
+export function post(endpoint, body, options = {}) {
+    return request(endpoint, {
+        ...options,
+        method: 'POST',
+        body: JSON.stringify(body),
+    });
+}
+
+/**
+ * PUT isteği
+ * @param {string} endpoint 
+ * @param {object} body 
+ * @param {object} options 
+ * @returns {Promise<object>}
+ */
+export function put(endpoint, body, options = {}) {
+    return request(endpoint, {
+        ...options,
+        method: 'PUT',
+        body: JSON.stringify(body),
+    });
+}
+
+/**
+ * DELETE isteği
+ * @param {string} endpoint 
+ * @param {object} options 
+ * @returns {Promise<object>}
+ */
+export function del(endpoint, options = {}) {
+    return request(endpoint, { ...options, method: 'DELETE' });
+}
+
+/**
+ * FormData ile POST isteği (dosya yükleme için)
+ * @param {string} endpoint 
+ * @param {FormData} formData 
+ * @param {object} options 
+ * @returns {Promise<object>}
+ */
+export async function postFormData(endpoint, formData, options = {}) {
+    const url = `${API_BASE_URL}${endpoint}`;
+
+    const config = {
+        method: 'POST',
+        body: formData,
+        ...options,
+    };
+
+    // Token varsa header'a ekle
+    if (typeof window !== 'undefined') {
+        const token = localStorage.getItem('accessToken');
+        if (token) {
+            config.headers = {
+                ...config.headers,
+                Authorization: `Bearer ${token}`,
+            };
+        }
+    }
+
+    try {
+        const response = await fetch(url, config);
+        const data = await response.json();
+
+        if (!response.ok) {
+            const error = new Error(data.message || 'Bir hata oluştu');
+            error.status = response.status;
+            error.data = data;
+            throw error;
+        }
+
+        return data;
+    } catch (error) {
+        if (!error.status) {
+            error.message = 'Sunucuya bağlanılamadı';
+            error.status = 0;
+        }
+        throw error;
+    }
+}
+
+export default { get, post, put, del, postFormData };
