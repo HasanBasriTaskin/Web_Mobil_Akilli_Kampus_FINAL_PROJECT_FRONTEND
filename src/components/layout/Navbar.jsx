@@ -38,7 +38,7 @@ export function Navbar({ onMenuClick }) {
     return (
         <header className="sticky top-0 z-50 h-16 backdrop-blur-xl bg-white/80 dark:bg-slate-900/80 border-b border-border">
             <div className="h-full px-4 lg:px-6 flex items-center justify-between">
-                {/* Left: Menu button + Logo */}
+                {/* Left: Menu button + Logo (mobile only) */}
                 <div className="flex items-center gap-3">
                     {/* Mobile menu button */}
                     <button
@@ -48,12 +48,12 @@ export function Navbar({ onMenuClick }) {
                         <Menu className="size-5" />
                     </button>
 
-                    {/* Logo */}
-                    <Link href="/dashboard" className="flex items-center gap-2.5">
+                    {/* Logo - Mobile only */}
+                    <Link href="/dashboard" className="lg:hidden flex items-center gap-2.5">
                         <div className="p-1.5 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 text-white shadow-lg shadow-violet-500/20">
                             <GraduationCap className="size-5" />
                         </div>
-                        <span className="hidden sm:block text-lg font-bold bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-violet-400 dark:to-indigo-400 bg-clip-text text-transparent">
+                        <span className="text-lg font-bold bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-violet-400 dark:to-indigo-400 bg-clip-text text-transparent">
                             SmartCampus
                         </span>
                     </Link>

@@ -13,7 +13,8 @@ import {
     MessageSquare,
     Bell,
     FileText,
-    X
+    X,
+    GraduationCap
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth.store';
@@ -110,14 +111,25 @@ export function Sidebar({ isOpen, onClose }) {
             {/* Sidebar */}
             <aside
                 className={cn(
-                    "fixed left-0 z-50 lg:z-30 h-screen lg:h-[calc(100vh-4rem)] lg:top-16 w-64 bg-white dark:bg-slate-900 border-r border-border flex flex-col transition-transform duration-300",
-                    isOpen ? "translate-x-0 top-0" : "-translate-x-full lg:translate-x-0"
+                    "fixed left-0 z-50 lg:z-30 h-screen top-0 w-64 bg-white dark:bg-slate-900 border-r border-border flex flex-col transition-transform duration-300",
+                    isOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
                 )}
             >
-                {/* Mobile close button */}
-                <div className="lg:hidden h-16 px-4 flex items-center justify-between border-b border-border">
-                    <span className="text-lg font-semibold">Menü</span>
-                    <button onClick={onClose} className="p-2 hover:bg-accent rounded-md">
+                {/* Header with Logo (Desktop) / Close button (Mobile) */}
+                <div className="h-16 px-4 flex items-center justify-between border-b border-border shrink-0">
+                    {/* Logo - Desktop only */}
+                    <Link href="/dashboard" className="hidden lg:flex items-center gap-2.5">
+                        <div className="p-1.5 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 text-white shadow-lg shadow-violet-500/20">
+                            <GraduationCap className="size-5" />
+                        </div>
+                        <span className="text-lg font-bold bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-violet-400 dark:to-indigo-400 bg-clip-text text-transparent">
+                            SmartCampus
+                        </span>
+                    </Link>
+
+                    {/* Mobile header */}
+                    <span className="lg:hidden text-lg font-semibold">Menü</span>
+                    <button onClick={onClose} className="lg:hidden p-2 hover:bg-accent rounded-md">
                         <X className="size-5" />
                     </button>
                 </div>
