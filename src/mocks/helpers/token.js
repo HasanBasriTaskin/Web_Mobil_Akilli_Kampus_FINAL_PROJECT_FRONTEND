@@ -4,6 +4,20 @@
  */
 
 /**
+ * Base64 encode (Node.js compatible)
+ */
+function base64Encode(str) {
+    return Buffer.from(str).toString('base64url');
+}
+
+/**
+ * Base64 decode (Node.js compatible)
+ */
+function base64Decode(str) {
+    return Buffer.from(str, 'base64url').toString('utf-8');
+}
+
+/**
  * Rastgele token oluşturur
  * @param {number} length - Token uzunluğu
  * @returns {string} Rastgele token
@@ -23,8 +37,8 @@ export function generateToken(length = 32) {
  * @returns {string} Mock JWT token
  */
 export function generateAccessToken(user) {
-    const header = btoa(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
-    const payload = btoa(JSON.stringify({
+    const header = base64Encode(JSON.stringify({ alg: 'HS256', typ: 'JWT' }));
+    const payload = base64Encode(JSON.stringify({
         sub: user.id,
         email: user.email,
         name: user.fullName,
@@ -88,7 +102,7 @@ export function decodeToken(token) {
             return null;
         }
 
-        const payload = JSON.parse(atob(parts[1]));
+        const payload = JSON.parse(base64Decode(parts[1]));
 
         // Token süresi kontrolü
         if (payload.exp && payload.exp < Math.floor(Date.now() / 1000)) {
@@ -100,3 +114,4 @@ export function decodeToken(token) {
         return null;
     }
 }
+
