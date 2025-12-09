@@ -19,6 +19,19 @@ export const authService = {
     return response.data;
   },
 
+  // Reset Password
+  resetPassword: async (email, token, newPassword, confirmPassword) => {
+    // .NET model binder case-insensitive, ancak DTO alan adlarıyla eşleşmesi için PascalCase kullandık
+    const payload = {
+      Email: email,
+      Token: token,
+      NewPassword: newPassword,
+      ConfirmPassword: confirmPassword,
+    };
+    const response = await api.post('/Auth/reset-password', payload);
+    return response.data;
+  },
+
   // Verify Email
   verifyEmail: async (userId, token) => {
     const response = await api.post(`/Auth/verify-email?userId=${encodeURIComponent(userId)}&token=${encodeURIComponent(token)}`);
