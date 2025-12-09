@@ -62,7 +62,13 @@ export default function ProfilePage() {
         setIsLoading(true);
 
         try {
-            const response = await updateProfile(data);
+            // Email'i isteğe ekle (backend zorunlu tutuyor)
+            const updateData = {
+                ...data,
+                email: user.email, // Email değişmeyecek ama backend istiyor
+            };
+
+            const response = await updateProfile(updateData);
 
             if (response.success) {
                 // Store'u güncelle
