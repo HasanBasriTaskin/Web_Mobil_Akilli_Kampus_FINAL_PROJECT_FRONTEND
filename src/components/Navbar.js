@@ -74,11 +74,11 @@ const Navbar = () => {
         </Typography>
         
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
-          {user && (
+        {user && (
             <Box sx={{ display: { xs: 'none', md: 'flex' }, flexDirection: 'column', alignItems: 'flex-end', mr: 1 }}>
-              <Typography
-                variant="body2"
-                sx={{
+            <Typography
+              variant="body2"
+              sx={{
                   color: 'white',
                   fontWeight: 600,
                   fontSize: '0.95rem',
@@ -93,69 +93,69 @@ const Navbar = () => {
                     color: 'rgba(255, 255, 255, 0.8)',
                     fontSize: '0.75rem',
                     textTransform: 'capitalize',
-                  }}
-                >
+              }}
+            >
                   {user.role === 'Student' ? 'Öğrenci' : 
                    user.role === 'Faculty' ? 'Öğretim Üyesi' : 
                    user.role === 'Admin' ? 'Yönetici' : user.role}
-                </Typography>
+            </Typography>
               )}
             </Box>
           )}
-          <IconButton
-            size="large"
-            onClick={handleMenuOpen}
-            sx={{
-              color: 'white',
-              background: 'rgba(255, 255, 255, 0.1)',
-              '&:hover': {
-                background: 'rgba(255, 255, 255, 0.2)',
-                transform: 'scale(1.1)',
-              },
-              transition: 'all 0.3s ease',
-            }}
-          >
-            <AccountCircle sx={{ fontSize: 32 }} />
-          </IconButton>
-          <Menu
-            anchorEl={anchorEl}
-            open={Boolean(anchorEl)}
-            onClose={handleMenuClose}
-            PaperProps={{
-              sx: {
-                borderRadius: 2,
-                mt: 1,
-                minWidth: 200,
-                boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
-              },
-            }}
-          >
-            <MenuItem
-              onClick={handleProfile}
+            <IconButton
+              size="large"
+              onClick={handleMenuOpen}
               sx={{
+                color: 'white',
+                background: 'rgba(255, 255, 255, 0.1)',
                 '&:hover': {
-                  background: 'linear-gradient(135deg, #ff6b35 0%, #f7931e 100%)',
-                  color: 'white',
+                  background: 'rgba(255, 255, 255, 0.2)',
+                  transform: 'scale(1.1)',
                 },
                 transition: 'all 0.3s ease',
               }}
             >
-              <Person sx={{ mr: 1 }} /> Profilim
-            </MenuItem>
-            <MenuItem
-              onClick={handleLogout}
-              sx={{
-                '&:hover': {
+                <AccountCircle sx={{ fontSize: 32 }} />
+            </IconButton>
+            <Menu
+              anchorEl={anchorEl}
+              open={Boolean(anchorEl)}
+              onClose={handleMenuClose}
+              PaperProps={{
+                sx: {
+                  borderRadius: 2,
+                  mt: 1,
+                  minWidth: 200,
+                  boxShadow: '0 10px 25px rgba(0, 0, 0, 0.1)',
+                },
+              }}
+            >
+              <MenuItem
+                onClick={handleProfile}
+                sx={{
+                  '&:hover': {
+                    background: 'linear-gradient(135deg, #ff6b35 0%, #f7931e 100%)',
+                    color: 'white',
+                  },
+                  transition: 'all 0.3s ease',
+                }}
+              >
+                <Person sx={{ mr: 1 }} /> Profilim
+              </MenuItem>
+              <MenuItem
+                onClick={handleLogout}
+                sx={{
+                  '&:hover': {
                   background: 'linear-gradient(135deg, #dc2626 0%, #b91c1c 100%)',
-                  color: 'white',
-                },
-                transition: 'all 0.3s ease',
-              }}
-            >
-              <Logout sx={{ mr: 1 }} /> Çıkış Yap
-            </MenuItem>
-          </Menu>
-        </Box>
+                    color: 'white',
+                  },
+                  transition: 'all 0.3s ease',
+                }}
+              >
+                <Logout sx={{ mr: 1 }} /> Çıkış Yap
+              </MenuItem>
+            </Menu>
+          </Box>
       </Toolbar>
     </AppBar>
   );

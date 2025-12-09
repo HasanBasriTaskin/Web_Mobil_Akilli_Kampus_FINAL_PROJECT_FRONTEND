@@ -124,10 +124,10 @@ const Register = () => {
       
       // Backend response format: { data, isSuccessful, errors } (camelCase)
       if (response?.isSuccessful || response?.IsSuccessful) {
-        showToast(
+      showToast(
           'Kayıt başarılı! Email doğrulama linki gönderildi.',
-          'success'
-        );
+        'success'
+      );
         // Stay on register page after successful registration
       } else {
         const errorMessage = response?.errors?.[0] || response?.Errors?.[0] || 'Kayıt başarısız!';
@@ -225,6 +225,7 @@ const Register = () => {
               options={[
                 { value: 'Student', label: 'Öğrenci' },
                 { value: 'Faculty', label: 'Öğretim Üyesi' },
+                { value: 'Admin', label: 'Admin' },
               ]}
             />
             {userType === 'Student' && (
@@ -298,22 +299,22 @@ const Register = () => {
               {isSubmitting ? 'Kayıt yapılıyor...' : 'Kayıt Ol'}
             </Button>
             <Box sx={{ textAlign: 'center', mt: 3 }}>
-              <MuiLink
-                component={Link}
+                <MuiLink
+                  component={Link}
                 to="/forgot-password"
                 variant="body2"
-                sx={{
-                  color: '#ff6b35',
-                  fontWeight: 600,
-                  textDecoration: 'none',
-                  '&:hover': {
-                    textDecoration: 'underline',
-                    color: '#004e89',
-                  },
-                }}
-              >
+                  sx={{
+                    color: '#ff6b35',
+                    fontWeight: 600,
+                    textDecoration: 'none',
+                    '&:hover': {
+                      textDecoration: 'underline',
+                      color: '#004e89',
+                    },
+                  }}
+                >
                 Şifremi Unuttum
-              </MuiLink>
+                </MuiLink>
             </Box>
           </Box>
         </Paper>
