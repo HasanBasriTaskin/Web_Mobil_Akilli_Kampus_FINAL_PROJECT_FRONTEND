@@ -34,15 +34,24 @@ async function request(endpoint, options = {}) {
         const response = await fetch(url, config);
         const data = await response.json();
 
-        if (!response.ok) {
-            // API hata yanıtı
-            const error = new Error(data.message || 'Bir hata oluştu');
+        // Backend formatına uyumluluk: isSuccessful veya success
+        const isSuccess = data.success ?? data.isSuccessful ?? response.ok;
+
+        if (!isSuccess) {
+            // Backend hata mesajını al: errors array veya message
+            const errorMessage = data.errors?.[0] || data.message || 'Bir hata oluştu';
+            const error = new Error(errorMessage);
             error.status = response.status;
             error.data = data;
             throw error;
         }
 
-        return data;
+        // Yanıtı normalize et
+        return {
+            success: true,
+            data: data.data ?? data,
+            message: data.message || null
+        };
     } catch (error) {
         // Network hatası veya JSON parse hatası
         if (!error.status) {

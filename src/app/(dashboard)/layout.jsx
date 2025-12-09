@@ -22,8 +22,8 @@ export default function DashboardLayout({ children }) {
                     onClose={() => setSidebarOpen(false)}
                 />
 
-                {/* Main content area */}
-                <div className="lg:pl-64 flex flex-col min-h-screen">
+                {/* Main content area - offset by sidebar width on desktop */}
+                <div className="lg:ml-64 flex flex-col min-h-screen">
                     {/* Navbar */}
                     <Navbar onMenuClick={() => setSidebarOpen(true)} />
 
