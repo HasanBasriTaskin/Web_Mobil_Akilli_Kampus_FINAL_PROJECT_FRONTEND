@@ -32,6 +32,7 @@ function ResetPasswordContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const token = searchParams.get('token');
+    const email = searchParams.get('email');
 
     const [showPassword, setShowPassword] = useState(false);
     const [showConfirmPassword, setShowConfirmPassword] = useState(false);
@@ -52,13 +53,13 @@ function ResetPasswordContent() {
     }, [password]);
 
     useEffect(() => {
-        if (!token) {
+        if (!token || !email) {
             setStatus('error');
         }
-    }, [token]);
+    }, [token, email]);
 
     async function onSubmit(data) {
-        if (!token) {
+        if (!token || !email) {
             toast.error('Geçersiz sıfırlama linki');
             return;
         }
@@ -66,7 +67,12 @@ function ResetPasswordContent() {
         setIsLoading(true);
 
         try {
-            const response = await resetPassword(token, data.password);
+            const response = await resetPassword({
+                email,
+                token,
+                newPassword: data.password,
+                confirmPassword: data.confirmPassword,
+            });
 
             if (response.success) {
                 setStatus('success');
