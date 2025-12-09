@@ -31,7 +31,7 @@ export const registerSchema = z.object({
 
     userType: z.enum(['Student', 'Faculty'], {
         required_error: 'Kullanıcı tipi seçiniz',
-        invalid_type_error: 'Geçersiz kullanıcı tipi',
+        message: 'Lütfen Öğrenci veya Akademisyen seçiniz',
     }),
 
     // Student fields (conditional)

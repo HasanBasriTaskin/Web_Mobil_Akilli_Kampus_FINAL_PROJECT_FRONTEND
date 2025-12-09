@@ -82,7 +82,7 @@ export function RegisterForm() {
             transition={{ duration: 0.4 }}
         >
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5" noValidate>
                     {/* User Type Selection */}
                     <FormField
                         control={form.control}

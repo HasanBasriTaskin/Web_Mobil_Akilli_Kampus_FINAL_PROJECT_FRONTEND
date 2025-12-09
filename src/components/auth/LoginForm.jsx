@@ -74,7 +74,7 @@ export function LoginForm() {
             transition={{ duration: 0.4 }}
         >
             <Form {...form}>
-                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+                <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5" noValidate>
                     {/* Email Field */}
                     <FormField
                         control={form.control}
