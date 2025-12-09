@@ -7,6 +7,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { uploadProfilePicture } from '@/services/user.service';
 import { useAuthStore } from '@/stores/auth.store';
+import { getProfilePictureUrl } from '@/lib/url-helper';
 
 /**
  * Profile Picture Upload Component
@@ -66,7 +67,8 @@ export function ProfilePictureUpload({ currentPicture, onUploadSuccess }) {
         }
     };
 
-    const displayImage = preview || currentPicture;
+    // Önizleme varsa onu kullan, yoksa backend URL'i ile birleştir
+    const displayImage = preview || getProfilePictureUrl(currentPicture);
 
     return (
         <div className="flex flex-col items-center gap-4">
