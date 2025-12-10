@@ -1,0 +1,45 @@
+# Dependencies
+node_modules
+npm-debug.log*
+
+# Build outputs
+.next
+out
+build
+
+# Git
+.git
+.gitignore
+
+# Environment files (production values docker-compose'da tanımlanacak)
+.env
+.env.local
+.env.development
+.env.development.local
+# NOT: .env.production IGNORE EDİLMEMELİ - build-time'da gerekli!
+
+# Testing
+__tests__
+coverage
+*.test.js
+*.test.jsx
+jest.config.js
+jest.setup.js
+
+# IDE
+.vscode
+.idea
+*.swp
+*.swo
+
+# Documentation
+*.md
+docs
+
+# Misc
+.DS_Store
+Thumbs.db
+*.log
+
+# Backend folder (frontend repo içindeki referans dosyaları)
+backend
