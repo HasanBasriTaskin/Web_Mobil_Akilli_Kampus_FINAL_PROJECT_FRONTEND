@@ -421,3 +421,7 @@ FodyWeavers.xsd
 
 .next
 backend
+
+# Jest coverage
+coverage/
+__tests__/__snapshots__/
