@@ -1,0 +1,27 @@
+name: Deploy to Production
+on:
+  push:
+    branches:
+      - hasan
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Deploy to VM
+        uses: appleboy/ssh-action@v1.0.3
+        with:
+          host: ${{ secrets.SSH_HOST }}
+          username: ${{ secrets.SSH_USER }}
+          key: ${{ secrets.SSH_PRIVATE_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            cd ~/MehmetFinalProje/frontend
+            
+            # Pull latest changes
+            git fetch origin
+            git reset --hard origin/hasan
+            
+            # Rebuild frontend
+            cd ~/MehmetFinalProje/backend
+            docker-compose -f docker-compose.prod.yml up -d --build frontend
