@@ -16,20 +16,21 @@ function VerifyEmailContent() {
     const searchParams = useSearchParams();
     const router = useRouter();
     const token = searchParams.get('token');
+    const userId = searchParams.get('userId');
 
     const [status, setStatus] = useState('loading'); // loading, success, error
     const [message, setMessage] = useState('');
 
     useEffect(() => {
         async function verify() {
-            if (!token) {
+            if (!token || !userId) {
                 setStatus('error');
                 setMessage('Doğrulama linki geçersiz. Lütfen email\'inizdeki linke tekrar tıklayın.');
                 return;
             }
 
             try {
-                const response = await verifyEmail(token);
+                const response = await verifyEmail(userId, token);
 
                 if (response.success) {
                     setStatus('success');
@@ -45,7 +46,7 @@ function VerifyEmailContent() {
         }
 
         verify();
-    }, [token]);
+    }, [token, userId]);
 
     return (
         <AuthLayout
