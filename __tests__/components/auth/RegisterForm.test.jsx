@@ -24,7 +24,6 @@ jest.mock('sonner', () => ({
 
 jest.mock('@/components/auth/PasswordStrengthMeter', () => {
     return function MockPasswordStrengthMeter() {
-        // eslint-disable-next-line @typescript-eslint/no-require-imports
         const React = require('react');
         return React.createElement('div', { 'data-testid': 'strength-meter' }, 'Strength Meter');
     };
@@ -98,10 +97,10 @@ describe('RegisterForm', () => {
         const departmentSelect = selects.find(select => select.innerHTML.includes('dept_001'));
 
         if (departmentSelect) {
-             await userEvent.selectOptions(departmentSelect, 'dept_001');
+            await userEvent.selectOptions(departmentSelect, 'dept_001');
         } else {
-             // Fallback: try to select on the first visible select
-             await userEvent.selectOptions(selects[0], 'dept_001');
+            // Fallback: try to select on the first visible select
+            await userEvent.selectOptions(selects[0], 'dept_001');
         }
 
         // Student Number
@@ -116,15 +115,15 @@ describe('RegisterForm', () => {
         await userEvent.click(submitBtn);
 
         await waitFor(() => {
-             expect(register).toHaveBeenCalledWith(expect.objectContaining({
-                 fullName: 'Ali Veli',
-                 email: 'ali@edu.tr',
-                 userType: 'Student',
-                 departmentId: 'dept_001',
-                 studentNumber: '12345',
-                 password: 'Password123!',
-             }));
-             expect(mockRouter.push).toHaveBeenCalledWith('/login?registered=true');
+            expect(register).toHaveBeenCalledWith(expect.objectContaining({
+                fullName: 'Ali Veli',
+                email: 'ali@edu.tr',
+                userType: 'Student',
+                departmentId: 'dept_001',
+                studentNumber: '12345',
+                password: 'Password123!',
+            }));
+            expect(mockRouter.push).toHaveBeenCalledWith('/login?registered=true');
         });
     });
 
@@ -151,8 +150,8 @@ describe('RegisterForm', () => {
         await userEvent.click(submitBtn);
 
         await waitFor(() => {
-             expect(register).toHaveBeenCalled();
-             expect(toast.error).toHaveBeenCalledWith('Kayıt başarısız', expect.anything());
+            expect(register).toHaveBeenCalled();
+            expect(toast.error).toHaveBeenCalledWith('Kayıt başarısız', expect.anything());
         });
     });
 });
