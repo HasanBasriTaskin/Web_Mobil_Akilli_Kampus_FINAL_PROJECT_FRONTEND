@@ -1,8 +1,10 @@
 name: Deploy to Production
+
 on:
   push:
     branches:
       - hasan
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -16,12 +18,21 @@ jobs:
           key: ${{ secrets.SSH_PRIVATE_KEY }}
           port: ${{ secrets.SSH_PORT }}
           script: |
-            cd ~/MehmetFinalProje/frontend
+            # Create directories
+            mkdir -p ~/MehmetFinalProje
             
-            # Pull latest changes
-            git fetch origin
-            git reset --hard origin/hasan
+            cd ~/MehmetFinalProje
+            
+            # Frontend: Clone or pull
+            if [ -d "frontend/.git" ]; then
+              cd frontend
+              git fetch origin
+              git reset --hard origin/hasan
+            else
+              rm -rf frontend
+              git clone -b hasan https://${{ secrets.GH_TOKEN }}@github.com/HasanBasriTaskin/Web_Mobil_Akilli_Kampus_FINAL_PROJECT_FRONTEND.git frontend
+            fi
             
             # Rebuild frontend
             cd ~/MehmetFinalProje/backend
-            docker-compose -f docker-compose.prod.yml up -d --build frontend
+            docker compose -f docker-compose.prod.yml up -d --build frontend
