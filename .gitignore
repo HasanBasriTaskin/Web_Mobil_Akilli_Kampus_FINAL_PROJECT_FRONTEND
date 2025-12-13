@@ -10,6 +10,8 @@
 *.userosscache
 *.sln.docstates
 *.env
+.env.local
+.env.production
 
 # User-specific files (MonoDevelop/Xamarin Studio)
 *.userprefs
@@ -416,3 +418,10 @@ FodyWeavers.xsd
 *.msix
 *.msm
 *.msp
+
+.next
+backend
+
+# Jest coverage
+coverage/
+__tests__/__snapshots__/
