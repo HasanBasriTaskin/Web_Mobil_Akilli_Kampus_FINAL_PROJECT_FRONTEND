@@ -1,21 +1,22 @@
-# Development Dockerfile for Next.js Frontend
-# Uses development server with hot reload and runtime environment variables
+# Development Dockerfile for Next.js Frontend with Hot Reload
+# Uses development server with turbo mode for fast refresh
 
 FROM node:20-alpine
 
 WORKDIR /app
 
-# Install dependencies
+# Install dependencies first (for better caching)
 COPY package*.json ./
 RUN npm ci
 
-# Copy source code
+# Copy source code (this layer will be overwritten by volume mount)
 COPY . .
 
-# Copy .env.local for development environment variables
-COPY .env.local .env.local
+# Environment variables for hot reload in Docker
+ENV WATCHPACK_POLLING=true
+ENV CHOKIDAR_USEPOLLING=true
 
 EXPOSE 3000
 
-# Run development server
-CMD ["npm", "run", "dev"]
+# Run development server with turbo mode for faster hot reload
+CMD ["npm", "run", "dev", "--", "--turbo"]
