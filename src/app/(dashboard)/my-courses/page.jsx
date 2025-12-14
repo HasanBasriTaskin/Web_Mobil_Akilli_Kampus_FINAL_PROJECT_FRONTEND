@@ -26,6 +26,13 @@ import { mockEnrollments } from '@/mocks/academic.mock';
 /**
  * My Courses Page
  * Kayıtlı derslerim - görsel tasarıma benzer modern tasarım
+ * 
+ * Backend EnrollmentDto Response:
+ * {
+ *   id, studentId, studentNumber, studentName, sectionId,
+ *   courseCode, courseName, sectionNumber, status,
+ *   enrollmentDate, midtermGrade, finalGrade, letterGrade, gradePoint
+ * }
  */
 export default function MyCoursesPage() {
     const [courses, setCourses] = useState([]);
@@ -44,9 +51,44 @@ export default function MyCoursesPage() {
         try {
             setLoading(true);
             const response = await getMyCourses();
-            
-            if (response.success) {
-                setCourses(response.data?.items || response.data || []);
+
+            if (response.success && response.data) {
+                // Backend EnrollmentDto array veya nested data olabilir
+                let enrollmentsData;
+
+                if (Array.isArray(response.data)) {
+                    enrollmentsData = response.data;
+                } else if (response.data.data && Array.isArray(response.data.data)) {
+                    enrollmentsData = response.data.data;
+                } else {
+                    enrollmentsData = [];
+                }
+
+                // Backend formatını normalize et
+                const normalizedCourses = enrollmentsData.map(e => ({
+                    id: e.id,
+                    studentId: e.studentId,
+                    studentNumber: e.studentNumber,
+                    studentName: e.studentName,
+                    sectionId: e.sectionId,
+                    // Course info - backend'den düz gelir
+                    courseCode: e.courseCode,
+                    courseName: e.courseName,
+                    sectionNumber: e.sectionNumber,
+                    status: e.status,
+                    enrollmentDate: e.enrollmentDate,
+                    // Grade info
+                    midtermGrade: e.midtermGrade,
+                    finalGrade: e.finalGrade,
+                    letterGrade: e.letterGrade,
+                    gradePoint: e.gradePoint,
+                    // Mock data compatibility
+                    section: e.section,
+                    course: e.course,
+                    attendancePercentage: e.attendancePercentage || 85, // Default value
+                }));
+
+                setCourses(normalizedCourses);
             } else {
                 // Mock data fallback
                 setCourses(mockEnrollments);
@@ -69,14 +111,16 @@ export default function MyCoursesPage() {
         if (!selectedEnrollment) return;
 
         const enrollmentId = selectedEnrollment.id;
-        const courseName = selectedEnrollment.section?.course?.name || selectedEnrollment.course?.name;
+        const courseName = selectedEnrollment.courseName ||
+            selectedEnrollment.section?.course?.name ||
+            selectedEnrollment.course?.name;
 
         try {
             setDropping({ ...dropping, [enrollmentId]: true });
             setShowDropModal(false);
-            
+
             const response = await dropCourse(enrollmentId);
-            
+
             if (response.success) {
                 toast.success('Ders bırakıldı', {
                     description: `${courseName} dersinden kaydınız silindi`,
@@ -95,26 +139,26 @@ export default function MyCoursesPage() {
 
     function getAttendanceStatus(attendancePercentage) {
         if (attendancePercentage >= 80) {
-            return { 
-                color: 'text-green-600', 
+            return {
+                color: 'text-green-600',
                 bgColor: 'bg-green-500',
-                icon: CheckCircle2, 
+                icon: CheckCircle2,
                 label: 'İyi',
                 status: 'good'
             };
         } else if (attendancePercentage >= 70) {
-            return { 
-                color: 'text-yellow-600', 
+            return {
+                color: 'text-yellow-600',
                 bgColor: 'bg-yellow-500',
-                icon: AlertTriangle, 
+                icon: AlertTriangle,
                 label: 'Uyarı',
                 status: 'warning'
             };
         } else {
-            return { 
-                color: 'text-red-600', 
+            return {
+                color: 'text-red-600',
                 bgColor: 'bg-red-500',
-                icon: XCircle, 
+                icon: XCircle,
                 label: 'Kritik',
                 status: 'critical'
             };
@@ -128,27 +172,33 @@ export default function MyCoursesPage() {
         if (code.includes('MAT') || code.includes('MATH')) return 'bg-red-500';
         if (code.includes('HIS') || code.includes('TAR')) return 'bg-green-500';
         if (code.includes('PHY') || code.includes('FIZ')) return 'bg-purple-500';
-        return 'bg-blue-500';
+        if (code.includes('SE')) return 'bg-blue-500';
+        if (code.includes('CE')) return 'bg-orange-500';
+        return 'bg-indigo-500';
     }
 
-    // Filter courses
+    // Filter courses - backend veya mock data uyumlu
     const filteredCourses = courses.filter(enrollment => {
-        const course = enrollment.section?.course || enrollment.course;
-        const section = enrollment.section;
-        
-        const matchesSearch = !searchTerm || 
-            course?.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            course?.code?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            section?.instructor?.fullName?.toLowerCase().includes(searchTerm.toLowerCase());
-        
-        const matchesSemester = !semesterFilter || 
-            (section?.semester === semesterFilter || section?.year === semesterFilter);
-        
+        // Backend formatı: courseCode, courseName doğrudan
+        // Mock formatı: section.course.code, section.course.name
+        const courseCode = enrollment.courseCode || enrollment.section?.course?.code || enrollment.course?.code;
+        const courseName = enrollment.courseName || enrollment.section?.course?.name || enrollment.course?.name;
+        const instructorName = enrollment.section?.instructor?.fullName || '';
+
+        const matchesSearch = !searchTerm ||
+            courseName?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            courseCode?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+            instructorName?.toLowerCase().includes(searchTerm.toLowerCase());
+
+        const semester = enrollment.section?.semester;
+        const matchesSemester = !semesterFilter || semester === semesterFilter;
+
         return matchesSearch && matchesSemester;
     });
 
     // Get unique semesters
     const semesters = [...new Set(courses.map(e => e.section?.semester).filter(Boolean))];
+
 
     return (
         <div className="space-y-6">
@@ -218,12 +268,17 @@ export default function MyCoursesPage() {
             ) : (
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {filteredCourses.map((enrollment, index) => {
-                        const course = enrollment.section?.course || enrollment.course;
+                        // Backend formatı: courseCode, courseName doğrudan
+                        // Mock formatı: section.course.code, section.course.name
+                        const courseCode = enrollment.courseCode || enrollment.section?.course?.code || enrollment.course?.code;
+                        const courseName = enrollment.courseName || enrollment.section?.course?.name || enrollment.course?.name;
+                        const courseId = enrollment.sectionId || enrollment.section?.courseId || enrollment.course?.id;
+                        const sectionNumber = enrollment.sectionNumber || enrollment.section?.sectionNumber;
                         const section = enrollment.section;
-                        const attendancePercentage = enrollment.attendancePercentage || 0;
+                        const attendancePercentage = enrollment.attendancePercentage || 85;
                         const attendanceStatus = getAttendanceStatus(attendancePercentage);
                         const StatusIcon = attendanceStatus.icon;
-                        const codeColor = getCourseCodeColor(course?.code);
+                        const codeColor = getCourseCodeColor(courseCode);
 
                         return (
                             <motion.div
@@ -241,13 +296,13 @@ export default function MyCoursesPage() {
                                 {/* Course Code Badge */}
                                 <div className="mb-4">
                                     <span className={`inline-block px-3 py-1 rounded-full text-white text-sm font-semibold ${codeColor}`}>
-                                        {course?.code}{section ? `-${section.sectionNumber}` : ''}
+                                        {courseCode}{sectionNumber ? `-${sectionNumber}` : ''}
                                     </span>
                                 </div>
 
                                 {/* Course Title */}
                                 <h3 className="text-xl font-bold mb-4 group-hover:text-primary transition-colors">
-                                    {course?.name}
+                                    {courseName}
                                 </h3>
 
                                 {/* Section Info */}
@@ -292,7 +347,26 @@ export default function MyCoursesPage() {
                                             </div>
                                         </div>
                                     )}
+
+                                    {/* Grades - Backend'den gelebilir */}
+                                    {(enrollment.midtermGrade !== null || enrollment.finalGrade !== null || enrollment.letterGrade) && (
+                                        <div className="flex items-center gap-3">
+                                            <div className="p-2 rounded-lg bg-primary/10">
+                                                <BookOpen className="size-4 text-primary" />
+                                            </div>
+                                            <div className="flex-1">
+                                                <div className="text-xs text-muted-foreground">Notlar</div>
+                                                <div className="font-medium text-sm">
+                                                    {enrollment.midtermGrade != null && `Vize: ${enrollment.midtermGrade}`}
+                                                    {enrollment.midtermGrade != null && enrollment.finalGrade != null && ' | '}
+                                                    {enrollment.finalGrade != null && `Final: ${enrollment.finalGrade}`}
+                                                    {enrollment.letterGrade && ` (${enrollment.letterGrade})`}
+                                                </div>
+                                            </div>
+                                        </div>
+                                    )}
                                 </div>
+
 
                                 {/* Attendance */}
                                 <div className="mb-4 p-4 rounded-lg bg-slate-50 dark:bg-slate-800/50">
@@ -325,20 +399,30 @@ export default function MyCoursesPage() {
 
                                 {/* Actions */}
                                 <div className="flex gap-2">
-                                    <Link href={`/courses/${course?.id}`} className="flex-1">
+                                    <Link href={`/courses/${courseId}`} className="flex-1">
                                         <Button variant="outline" className="w-full gap-2">
                                             <Eye className="size-4" />
                                             Detayları Gör
                                         </Button>
                                     </Link>
-                                    <Button
-                                        variant="destructive"
-                                        onClick={() => handleDropClick(enrollment)}
-                                        disabled={dropping[enrollment.id]}
-                                        className="flex-1"
-                                    >
-                                        {dropping[enrollment.id] ? 'Bırakılıyor...' : 'Dersi Bırak'}
-                                    </Button>
+                                    {enrollment.status === 'Active' ? (
+                                        <Button
+                                            variant="destructive"
+                                            onClick={() => handleDropClick(enrollment)}
+                                            disabled={dropping[enrollment.id]}
+                                            className="flex-1"
+                                        >
+                                            {dropping[enrollment.id] ? 'Bırakılıyor...' : 'Dersi Bırak'}
+                                        </Button>
+                                    ) : (
+                                        <Button
+                                            variant="outline"
+                                            disabled
+                                            className="flex-1 text-muted-foreground"
+                                        >
+                                            {enrollment.status === 'Dropped' ? 'Bırakıldı' : enrollment.status || 'Kayıtlı'}
+                                        </Button>
+                                    )}
                                 </div>
                             </motion.div>
                         );

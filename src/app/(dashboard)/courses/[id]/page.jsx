@@ -49,7 +49,7 @@ export default function CourseDetailPage() {
     async function loadCourseData() {
         try {
             setLoading(true);
-            
+
             // Ders detaylarını yükle
             const courseResponse = await getCourseById(courseId);
             if (courseResponse.success) {
@@ -62,8 +62,19 @@ export default function CourseDetailPage() {
 
             // Section'ları yükle
             const sectionsResponse = await getSections({ courseId });
-            if (sectionsResponse.success) {
-                setSections(sectionsResponse.data?.items || sectionsResponse.data || []);
+            if (sectionsResponse.success && sectionsResponse.data) {
+                // Backend PagedResponse veya doğrudan array dönebilir
+                let sectionsData;
+                if (Array.isArray(sectionsResponse.data)) {
+                    sectionsData = sectionsResponse.data;
+                } else if (sectionsResponse.data.data && Array.isArray(sectionsResponse.data.data)) {
+                    sectionsData = sectionsResponse.data.data;
+                } else if (sectionsResponse.data.items && Array.isArray(sectionsResponse.data.items)) {
+                    sectionsData = sectionsResponse.data.items;
+                } else {
+                    sectionsData = [];
+                }
+                setSections(sectionsData);
             } else {
                 // Mock data fallback
                 const mockSectionsForCourse = mockSections.filter(s => s.courseId === parseInt(courseId));
@@ -99,9 +110,9 @@ export default function CourseDetailPage() {
         try {
             setEnrolling({ ...enrolling, [selectedSection.id]: true });
             setShowEnrollModal(false);
-            
+
             const response = await enrollInCourse({ sectionId: selectedSection.id });
-            
+
             if (response.success) {
                 toast.success('Derse kayıt başarılı!', {
                     description: 'Ders listenize eklendi',
@@ -372,7 +383,7 @@ export default function CourseDetailPage() {
                                                 )}
                                             </Button>
                                         )}
-                                        
+
                                         {user?.role === 'Faculty' && (
                                             <>
                                                 <Link href={`/gradebook/${section.id}`} className="flex-1">
