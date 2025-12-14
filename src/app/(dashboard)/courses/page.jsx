@@ -7,7 +7,7 @@ import Link from 'next/link';
 
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
-import { getCourses, getDepartments } from '@/services/academic.service';
+import { getCourses } from '@/services/academic.service';
 import { mockCourses, mockDepartments } from '@/mocks/academic.mock';
 
 /**
@@ -16,83 +16,100 @@ import { mockCourses, mockDepartments } from '@/mocks/academic.mock';
  */
 export default function CoursesPage() {
     const [courses, setCourses] = useState([]);
-    const [departments, setDepartments] = useState([]);
+    const [departments] = useState(mockDepartments); // Departments endpoint yok, mock kullanılıyor
     const [loading, setLoading] = useState(true);
     const [searchTerm, setSearchTerm] = useState('');
     const [departmentFilter, setDepartmentFilter] = useState('');
     const [viewMode, setViewMode] = useState('grid'); // 'grid' or 'list'
+
+    // Pagination state - Backend tarafında yapılacak
     const [currentPage, setCurrentPage] = useState(1);
-    const [itemsPerPage] = useState(6);
+    const [pageSize] = useState(9);
+    const [totalPages, setTotalPages] = useState(1);
+    const [totalRecords, setTotalRecords] = useState(0);
+    const [hasNext, setHasNext] = useState(false);
+    const [hasPrevious, setHasPrevious] = useState(false);
 
     useEffect(() => {
-        loadDepartments();
         loadCourses();
-    }, []);
-
-    useEffect(() => {
-        loadCourses();
-    }, [departmentFilter]);
-
-    async function loadDepartments() {
-        try {
-            const response = await getDepartments();
-            if (response.success) {
-                setDepartments(response.data?.items || response.data || []);
-            } else {
-                setDepartments(mockDepartments);
-            }
-        } catch (error) {
-            console.error('Bölümler yüklenemedi, mock data kullanılıyor:', error);
-            setDepartments(mockDepartments);
-        }
-    }
+    }, [currentPage, departmentFilter]);
 
     async function loadCourses() {
         try {
             setLoading(true);
-            const params = {};
+
+            // Backend API'ye uygun parametreler
+            const params = {
+                pageNumber: currentPage,
+                pageSize: pageSize,
+            };
+
             if (searchTerm) params.search = searchTerm;
             if (departmentFilter) params.departmentId = departmentFilter;
 
             const response = await getCourses(params);
-            
-            if (response.success) {
-                setCourses(response.data?.items || response.data || []);
+
+            if (response.success && response.data) {
+                // Backend PagedResponse formatı: { data: [...], pageNumber, pageSize, totalPages, totalRecords, hasNext, hasPrevious }
+                // veya doğrudan array olabilir
+
+                if (Array.isArray(response.data)) {
+                    // Doğrudan array döndüyse
+                    setCourses(response.data);
+                    setTotalRecords(response.data.length);
+                    setTotalPages(1);
+                    setHasNext(false);
+                    setHasPrevious(false);
+                } else if (response.data.data && Array.isArray(response.data.data)) {
+                    // PagedResponse formatı (nested data)
+                    setCourses(response.data.data);
+                    setTotalPages(response.data.totalPages || 1);
+                    setTotalRecords(response.data.totalRecords || response.data.data.length);
+                    setHasNext(response.data.hasNext || false);
+                    setHasPrevious(response.data.hasPrevious || false);
+                } else {
+                    // PagedResponse formatı (flat - api-client normalizes)
+                    const coursesData = response.data;
+                    setCourses(Array.isArray(coursesData) ? coursesData : []);
+                }
             } else {
-                // Mock data fallback
-                let filteredCourses = [...mockCourses];
-                if (searchTerm) {
-                    filteredCourses = filteredCourses.filter(c => 
-                        c.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                        c.name.toLowerCase().includes(searchTerm.toLowerCase())
-                    );
-                }
-                if (departmentFilter) {
-                    filteredCourses = filteredCourses.filter(c => 
-                        c.department.id === parseInt(departmentFilter)
-                    );
-                }
-                setCourses(filteredCourses);
+                // API başarısız - Mock data fallback
+                handleMockDataFallback();
             }
         } catch (error) {
-            // Mock data fallback
             console.error('Dersler yüklenemedi, mock data kullanılıyor:', error);
-            let filteredCourses = [...mockCourses];
-            if (searchTerm) {
-                filteredCourses = filteredCourses.filter(c => 
-                    c.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
-                    c.name.toLowerCase().includes(searchTerm.toLowerCase())
-                );
-            }
-            if (departmentFilter) {
-                filteredCourses = filteredCourses.filter(c => 
-                    c.department.id === parseInt(departmentFilter)
-                );
-            }
-            setCourses(filteredCourses);
+            handleMockDataFallback();
         } finally {
             setLoading(false);
         }
+    }
+
+    function handleMockDataFallback() {
+        let filteredCourses = [...mockCourses];
+
+        if (searchTerm) {
+            filteredCourses = filteredCourses.filter(c =>
+                c.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                c.name.toLowerCase().includes(searchTerm.toLowerCase())
+            );
+        }
+        if (departmentFilter) {
+            filteredCourses = filteredCourses.filter(c =>
+                c.department?.id === parseInt(departmentFilter) ||
+                c.departmentId === parseInt(departmentFilter)
+            );
+        }
+
+        // Client-side pagination for mock data
+        const startIndex = (currentPage - 1) * pageSize;
+        const endIndex = startIndex + pageSize;
+        const paginatedMockCourses = filteredCourses.slice(startIndex, endIndex);
+
+        setCourses(paginatedMockCourses);
+        setTotalRecords(filteredCourses.length);
+        setTotalPages(Math.ceil(filteredCourses.length / pageSize));
+        setHasNext(endIndex < filteredCourses.length);
+        setHasPrevious(currentPage > 1);
     }
 
     function handleSearch(e) {
@@ -101,11 +118,6 @@ export default function CoursesPage() {
         loadCourses();
     }
 
-    // Pagination
-    const totalPages = Math.ceil(courses.length / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
-    const paginatedCourses = courses.slice(startIndex, endIndex);
 
     return (
         <div className="space-y-6">
@@ -184,14 +196,14 @@ export default function CoursesPage() {
                 <div className="flex items-center justify-center py-12">
                     <div className="text-muted-foreground">Yükleniyor...</div>
                 </div>
-            ) : paginatedCourses.length === 0 ? (
+            ) : courses.length === 0 ? (
                 <div className="text-center py-12 text-muted-foreground">
                     <BookOpen className="size-16 mx-auto mb-4 opacity-50" />
                     <p>Ders bulunamadı</p>
                 </div>
             ) : viewMode === 'grid' ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {paginatedCourses.map((course, index) => (
+                    {courses.map((course, index) => (
                         <motion.div
                             key={course.id}
                             initial={{ opacity: 0, y: 20 }}
@@ -240,7 +252,7 @@ export default function CoursesPage() {
                 </div>
             ) : (
                 <div className="space-y-4">
-                    {paginatedCourses.map((course, index) => (
+                    {courses.map((course, index) => (
                         <motion.div
                             key={course.id}
                             initial={{ opacity: 0, x: -20 }}
@@ -284,7 +296,7 @@ export default function CoursesPage() {
             {totalPages > 1 && (
                 <div className="flex items-center justify-between pt-4">
                     <p className="text-sm text-muted-foreground">
-                        {startIndex + 1} - {Math.min(endIndex, courses.length)} / {courses.length} sonuç gösteriliyor
+                        Sayfa {currentPage} / {totalPages} ({totalRecords} sonuç)
                     </p>
                     <div className="flex items-center gap-2">
                         <Button

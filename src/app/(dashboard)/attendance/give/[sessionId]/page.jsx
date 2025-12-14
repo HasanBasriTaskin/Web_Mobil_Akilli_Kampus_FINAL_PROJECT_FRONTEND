@@ -18,6 +18,7 @@ import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { getAttendanceSession, checkIn } from '@/services/attendance.service';
 import { mockAttendanceSessions } from '@/mocks/academic.mock';
+import { useAuthStore } from '@/stores/auth.store';
 
 /**
  * Give Attendance Page
@@ -26,6 +27,7 @@ import { mockAttendanceSessions } from '@/mocks/academic.mock';
 export default function GiveAttendancePage() {
     const params = useParams();
     const router = useRouter();
+    const { user } = useAuthStore();
     const sessionId = params.sessionId;
     const mapRef = useRef(null);
     const qrInputRef = useRef(null);
@@ -38,6 +40,13 @@ export default function GiveAttendancePage() {
     const [distance, setDistance] = useState(null);
     const [gettingLocation, setGettingLocation] = useState(false);
     const [showQRScanner, setShowQRScanner] = useState(false);
+
+    // Student only - redirect if not student
+    useEffect(() => {
+        if (user && user.role !== 'Student') {
+            router.push('/dashboard');
+        }
+    }, [user, router]);
 
     useEffect(() => {
         loadSession();
@@ -53,7 +62,7 @@ export default function GiveAttendancePage() {
         try {
             setLoading(true);
             const response = await getAttendanceSession(sessionId);
-            
+
             if (response.success) {
                 setSession(response.data);
             } else {
@@ -149,13 +158,13 @@ export default function GiveAttendancePage() {
 
         try {
             setCheckingIn(true);
-            
+
             const response = await checkIn(sessionId, {
                 latitude: location.latitude,
                 longitude: location.longitude,
                 accuracy: location.accuracy,
             });
-            
+
             if (response.success) {
                 toast.success('Yoklama verildi!', {
                     description: 'Yoklamanız başarıyla kaydedildi',

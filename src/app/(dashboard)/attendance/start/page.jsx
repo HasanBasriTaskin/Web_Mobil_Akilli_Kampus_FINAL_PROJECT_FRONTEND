@@ -20,6 +20,7 @@ import { useForm } from 'react-hook-form';
 import { getSections } from '@/services/academic.service';
 import { createAttendanceSession, getAttendanceSession } from '@/services/attendance.service';
 import { mockSections } from '@/mocks/academic.mock';
+import { useAuthStore } from '@/stores/auth.store';
 
 /**
  * Start Attendance Page
@@ -27,6 +28,7 @@ import { mockSections } from '@/mocks/academic.mock';
  */
 export default function StartAttendancePage() {
     const router = useRouter();
+    const { user } = useAuthStore();
     const [sections, setSections] = useState([]);
     const [loading, setLoading] = useState(true);
     const [starting, setStarting] = useState(false);
@@ -46,20 +48,29 @@ export default function StartAttendancePage() {
         },
     });
 
+    // Faculty/Admin only - redirect if not authorized
     useEffect(() => {
-        loadSections();
+        if (user && user.role !== 'Faculty' && user.role !== 'Admin') {
+            router.push('/dashboard');
+        }
+    }, [user, router]);
+
+    useEffect(() => {
+        if (user && (user.role === 'Faculty' || user.role === 'Admin')) {
+            loadSections();
+        }
         return () => {
             if (pollingInterval) {
                 clearInterval(pollingInterval);
             }
         };
-    }, []);
+    }, [user]);
 
     async function loadSections() {
         try {
             setLoading(true);
             const response = await getSections();
-            
+
             if (response.success) {
                 setSections(response.data?.items || response.data || []);
             } else {
@@ -90,7 +101,7 @@ export default function StartAttendancePage() {
     async function onSubmit(data) {
         try {
             setStarting(true);
-            
+
             const response = await createAttendanceSession({
                 sectionId: parseInt(data.sectionId),
                 date: data.date,
@@ -99,24 +110,24 @@ export default function StartAttendancePage() {
                 geofenceRadius: parseFloat(data.geofenceRadius),
                 sessionDuration: parseInt(data.sessionDuration),
             });
-            
+
             if (response.success) {
                 const session = response.data;
                 setActiveSession(session);
-                
+
                 // QR Code URL oluştur (online QR code generator)
                 const attendanceUrl = `${window.location.origin}/attendance/give/${session.id}`;
                 setQrCodeUrl(`https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=${encodeURIComponent(attendanceUrl)}`);
-                
+
                 // Real-time attendance count polling
                 const interval = setInterval(() => {
                     pollAttendanceCount(session.id);
                 }, 3000); // Her 3 saniyede bir
                 setPollingInterval(interval);
-                
+
                 // İlk sayıyı al
                 pollAttendanceCount(session.id);
-                
+
                 toast.success('Yoklama oturumu başlatıldı!', {
                     description: 'Öğrenciler yoklama verebilir',
                 });
@@ -345,7 +356,7 @@ export default function StartAttendancePage() {
                             <FormField
                                 control={form.control}
                                 name="sessionDuration"
-                                rules={{ 
+                                rules={{
                                     required: 'Süre giriniz',
                                     min: { value: 5, message: 'Minimum 5 dakika' },
                                     max: { value: 120, message: 'Maksimum 120 dakika' },
@@ -375,7 +386,7 @@ export default function StartAttendancePage() {
                             <FormField
                                 control={form.control}
                                 name="geofenceRadius"
-                                rules={{ 
+                                rules={{
                                     required: 'Yarıçap giriniz',
                                     min: { value: 5, message: 'Minimum 5 metre olmalı' },
                                     max: { value: 100, message: 'Maksimum 100 metre olabilir' },

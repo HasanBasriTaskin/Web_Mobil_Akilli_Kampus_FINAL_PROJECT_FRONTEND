@@ -32,7 +32,26 @@ async function request(endpoint, options = {}) {
 
     try {
         const response = await fetch(url, config);
-        const data = await response.json();
+
+        // Try to parse JSON, handle non-JSON responses gracefully
+        let data;
+        try {
+            data = await response.json();
+        } catch (parseError) {
+            // If JSON parsing fails (e.g., HTML 404 page), return error structure
+            if (!response.ok) {
+                const error = new Error(`HTTP Error: ${response.status} ${response.statusText}`);
+                error.status = response.status;
+                error.data = null;
+                throw error;
+            }
+            // For successful non-JSON responses, return empty data
+            return {
+                success: true,
+                data: null,
+                message: null
+            };
+        }
 
         // Backend formatına uyumluluk: isSuccessful veya success
         const isSuccess = data.success ?? data.isSuccessful ?? response.ok;
