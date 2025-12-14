@@ -77,7 +77,8 @@ export async function refreshToken() {
         throw new Error('Refresh token bulunamadı');
     }
 
-    const response = await post('/auth/refresh', { refreshToken: currentRefreshToken });
+    // Backend: POST /Auth/refresh-token with { token: "..." }
+    const response = await post('/Auth/refresh-token', { token: currentRefreshToken });
 
     if (response.success && response.data) {
         localStorage.setItem('accessToken', response.data.accessToken);
