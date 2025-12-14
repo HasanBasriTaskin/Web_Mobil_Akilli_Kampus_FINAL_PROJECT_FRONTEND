@@ -12,7 +12,7 @@ import {
 import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
-import { getMyGrades, getTranscriptPDF } from '@/services/academic.service';
+import { getMyGrades, getTranscript, getTranscriptPDF } from '@/services/academic.service';
 import { mockGrades } from '@/mocks/academic.mock';
 
 /**
@@ -34,9 +34,31 @@ export default function GradesPage() {
         try {
             setLoading(true);
             const response = await getMyGrades();
-            
-            if (response.success) {
-                setGrades(response.data?.items || response.data || []);
+
+            if (response.success && response.data) {
+                // Backend GradeDto array veya PagedResponse olabilir
+                let gradesData;
+
+                if (Array.isArray(response.data)) {
+                    gradesData = response.data;
+                } else if (response.data.data && Array.isArray(response.data.data)) {
+                    gradesData = response.data.data;
+                } else {
+                    gradesData = [];
+                }
+
+                // Backend formatını normalize et (courseCode/courseName doğrudan geliyor)
+                const normalizedGrades = gradesData.map(g => ({
+                    ...g,
+                    // Backend'den courseCode/courseName geliyorsa course objesi oluştur
+                    course: g.course || {
+                        code: g.courseCode,
+                        name: g.courseName,
+                        credits: g.credits || 3, // Default credits
+                    },
+                }));
+
+                setGrades(normalizedGrades);
             } else {
                 // Mock data fallback
                 setGrades(mockGrades);
@@ -53,15 +75,16 @@ export default function GradesPage() {
     async function loadTranscript() {
         try {
             const response = await getTranscript();
-            if (response.success) {
+            if (response.success && response.data) {
+                // Backend TranscriptDto formatı
                 setTranscript(response.data);
             } else {
                 // Mock transcript data
-                setTranscript({ cgpa: 3.0, gpa: 3.0 });
+                setTranscript({ cgpa: 0, gpa: 0 });
             }
         } catch (error) {
-            console.error('Transkript yüklenemedi, mock data kullanılıyor:', error);
-            setTranscript({ cgpa: 3.0, gpa: 3.0 });
+            console.error('Transkript yüklenemedi:', error);
+            setTranscript({ cgpa: 0, gpa: 0 });
         }
     }
 
@@ -69,7 +92,7 @@ export default function GradesPage() {
         try {
             setDownloadingPDF(true);
             const blob = await getTranscriptPDF();
-            
+
             // PDF'i indir
             const url = window.URL.createObjectURL(blob);
             const a = document.createElement('a');
@@ -137,13 +160,13 @@ export default function GradesPage() {
             'C+': 0, 'C': 0, 'C-': 0,
             'D+': 0, 'D': 0, 'F': 0,
         };
-        
+
         grades.forEach(grade => {
             if (grade.letterGrade && distribution.hasOwnProperty(grade.letterGrade)) {
                 distribution[grade.letterGrade]++;
             }
         });
-        
+
         return distribution;
     }
 
@@ -246,7 +269,7 @@ export default function GradesPage() {
                             {Object.entries(gradeDistribution).map(([grade, count]) => {
                                 if (count === 0) return null;
                                 const percentage = (count / maxCount) * 100;
-                                
+
                                 return (
                                     <div key={grade} className="space-y-2">
                                         <div className="flex items-center justify-between text-sm">
@@ -290,7 +313,7 @@ export default function GradesPage() {
                             ].map((semesterData, index) => {
                                 const maxGPA = 4.0;
                                 const percentage = (semesterData.gpa / maxGPA) * 100;
-                                
+
                                 return (
                                     <div key={index} className="space-y-2">
                                         <div className="flex items-center justify-between text-sm">
