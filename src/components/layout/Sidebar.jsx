@@ -14,7 +14,13 @@ import {
     Bell,
     FileText,
     X,
-    GraduationCap
+    GraduationCap,
+    GraduationCap as MyCoursesIcon,
+    Award,
+    ClipboardCheck,
+    MapPin,
+    FileCheck,
+    NotebookPen,
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth.store';
@@ -46,6 +52,48 @@ const navItems = [
         href: '/courses',
         icon: BookOpen,
         roles: ['Student', 'Faculty']
+    },
+    {
+        title: 'Kayıtlı Derslerim',
+        href: '/my-courses',
+        icon: MyCoursesIcon,
+        roles: ['Student']
+    },
+    {
+        title: 'Notlarım',
+        href: '/grades',
+        icon: Award,
+        roles: ['Student']
+    },
+    {
+        title: 'Yoklama Durumum',
+        href: '/my-attendance',
+        icon: ClipboardCheck,
+        roles: ['Student']
+    },
+    {
+        title: 'Yoklama Başlat',
+        href: '/attendance/start',
+        icon: MapPin,
+        roles: ['Faculty']
+    },
+    {
+        title: 'Yoklama Raporları',
+        href: '/attendance/reports',
+        icon: ClipboardCheck,
+        roles: ['Faculty']
+    },
+    {
+        title: 'Not Girişi',
+        href: '/gradebook',
+        icon: NotebookPen,
+        roles: ['Faculty']
+    },
+    {
+        title: 'Mazeret Talepleri',
+        href: '/excuse-requests',
+        icon: FileCheck,
+        roles: ['Faculty', 'Student']
     },
     {
         title: 'Takvim',
@@ -139,7 +187,8 @@ export function Sidebar({ isOpen, onClose }) {
 
                     <ul className="space-y-1">
                         {filteredNavItems.map((item) => {
-                            const isActive = pathname === item.href;
+                            // Check if current pathname starts with item href (for dynamic routes)
+                            const isActive = pathname === item.href || pathname.startsWith(item.href + '/');
                             const Icon = item.icon;
 
                             return (
