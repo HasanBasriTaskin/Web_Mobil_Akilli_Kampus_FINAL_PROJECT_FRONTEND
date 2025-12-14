@@ -1,82 +1,129 @@
 /**
  * Attendance Service
- * SOLID: Single Responsibility - Sadece yoklama işlemlerini yönetir
+ * API Dokümantasyonuna uygun - 7. Attendance Controller
+ * 
+ * Base Path: /api/v1/Attendance
+ * - POST /sessions - Oturum oluştur
+ * - GET /sessions/{id} - Oturum detayı
+ * - GET /sessions/{id}/records - Oturum kayıtları
+ * - GET /sessions/{id}/qr-code - QR kod
+ * - PUT /sessions/{id}/close - Oturum kapat
+ * - POST /sessions/{id}/checkin - Yoklama ver
+ * - GET /sessions/my-sessions - Benim oturumlarım
+ * - GET /students/{studentId} - Öğrenci yoklamaları
+ * - GET /report/{sectionId} - Rapor
+ * - GET /my-attendance - Benim yoklamam
+ * 
+ * Excuse Requests Base Path: /api/v1/attendance/excuse-requests
  */
 
 import { get, post, put, postFormData } from './api-client';
 
 /**
  * Yoklama oturumu açma (Faculty)
- * @param {object} sessionData - { sectionId, date, startTime, endTime, geofenceRadius }
- * @returns {Promise<object>} Oturum bilgileri
+ * POST /api/v1/Attendance/sessions
  */
 export async function createAttendanceSession(sessionData) {
-    return post('/attendance/sessions', sessionData);
+    return post('/Attendance/sessions', sessionData);
 }
 
 /**
  * Oturum detayları
- * @param {number|string} sessionId - Session ID
- * @returns {Promise<object>} Oturum detayları
+ * GET /api/v1/Attendance/sessions/{sessionId}
  */
 export async function getAttendanceSession(sessionId) {
-    return get(`/attendance/sessions/${sessionId}`);
+    return get(`/Attendance/sessions/${sessionId}`);
+}
+
+/**
+ * Oturum kayıtları - katılan öğrenciler (Faculty)
+ * GET /api/v1/Attendance/sessions/{sessionId}/records
+ */
+export async function getSessionRecords(sessionId) {
+    return get(`/Attendance/sessions/${sessionId}/records`);
+}
+
+/**
+ * QR kod bilgisi
+ * GET /api/v1/Attendance/sessions/{sessionId}/qr-code
+ */
+export async function getQRCode(sessionId) {
+    return get(`/Attendance/sessions/${sessionId}/qr-code`);
 }
 
 /**
  * Oturumu kapatma (Faculty)
- * @param {number|string} sessionId - Session ID
- * @returns {Promise<object>}
+ * PUT /api/v1/Attendance/sessions/{id}/close
  */
 export async function closeAttendanceSession(sessionId) {
-    return put(`/attendance/sessions/${sessionId}/close`, {});
+    return put(`/Attendance/sessions/${sessionId}/close`, {});
 }
 
 /**
  * Benim oturumlarım (Faculty)
- * @returns {Promise<object>} Oturum listesi
+ * GET /api/v1/Attendance/sessions/my-sessions
  */
 export async function getMySessions() {
-    return get('/attendance/sessions/my-sessions');
+    return get('/Attendance/sessions/my-sessions');
 }
 
 /**
  * Yoklama verme (Student)
- * @param {number|string} sessionId - Session ID
- * @param {object} locationData - { latitude, longitude, accuracy }
- * @returns {Promise<object>}
+ * POST /api/v1/Attendance/sessions/{sessionId}/checkin
  */
 export async function checkIn(sessionId, locationData) {
-    return post(`/attendance/sessions/${sessionId}/checkin`, locationData);
+    return post(`/Attendance/sessions/${sessionId}/checkin`, locationData);
+}
+
+/**
+ * Öğrenci yoklamaları
+ * GET /api/v1/Attendance/students/{studentId}
+ */
+export async function getStudentAttendance(studentId) {
+    return get(`/Attendance/students/${studentId}`);
 }
 
 /**
  * Yoklama durumum (Student)
- * @returns {Promise<object>} Yoklama istatistikleri
+ * GET /api/v1/Attendance/my-attendance
  */
 export async function getMyAttendance() {
-    return get('/attendance/my-attendance');
+    return get('/Attendance/my-attendance');
 }
 
 /**
  * Yoklama raporu (Faculty)
- * @param {number|string} sectionId - Section ID
- * @returns {Promise<object>} Rapor verisi
+ * GET /api/v1/Attendance/report/{sectionId}
  */
 export async function getAttendanceReport(sectionId) {
-    return get(`/attendance/report/${sectionId}`);
+    return get(`/Attendance/report/${sectionId}`);
+}
+
+// ============================================
+// EXCUSE REQUESTS - Base: /api/v1/attendance/excuse-requests
+// ============================================
+
+/**
+ * Mazeret talebi oluşturma (Student)
+ * POST /api/v1/attendance/excuse-requests
+ */
+export async function submitExcuseRequest(excuseData) {
+    // Dokümantasyona göre JSON body (documentUrl string olarak)
+    return post('/attendance/excuse-requests', {
+        sessionId: excuseData.sessionId,
+        reason: excuseData.reason,
+        documentUrl: excuseData.documentUrl || null,
+    });
 }
 
 /**
- * Mazeret bildirme (Student)
- * @param {object} excuseData - { sessionId, reason, document (File) }
- * @returns {Promise<object>}
+ * Mazeret talebi oluşturma (FormData ile dosya yükleme)
  */
-export async function submitExcuseRequest(excuseData) {
+export async function submitExcuseRequestWithFile(excuseData) {
     const formData = new FormData();
     formData.append('sessionId', excuseData.sessionId);
     formData.append('reason', excuseData.reason);
-    
+
     if (excuseData.document) {
         formData.append('document', excuseData.document);
     }
@@ -86,7 +133,7 @@ export async function submitExcuseRequest(excuseData) {
 
 /**
  * Mazeret listesi (Faculty)
- * @returns {Promise<object>} Mazeret talepleri listesi
+ * GET /api/v1/attendance/excuse-requests
  */
 export async function getExcuseRequests() {
     return get('/attendance/excuse-requests');
@@ -94,9 +141,7 @@ export async function getExcuseRequests() {
 
 /**
  * Mazeret onaylama (Faculty)
- * @param {number|string} requestId - Request ID
- * @param {object} data - { notes }
- * @returns {Promise<object>}
+ * PUT /api/v1/attendance/excuse-requests/{id}/approve
  */
 export async function approveExcuseRequest(requestId, data = {}) {
     return put(`/attendance/excuse-requests/${requestId}/approve`, data);
@@ -104,9 +149,7 @@ export async function approveExcuseRequest(requestId, data = {}) {
 
 /**
  * Mazeret reddetme (Faculty)
- * @param {number|string} requestId - Request ID
- * @param {object} data - { notes }
- * @returns {Promise<object>}
+ * PUT /api/v1/attendance/excuse-requests/{id}/reject
  */
 export async function rejectExcuseRequest(requestId, data = {}) {
     return put(`/attendance/excuse-requests/${requestId}/reject`, data);
@@ -115,12 +158,16 @@ export async function rejectExcuseRequest(requestId, data = {}) {
 export default {
     createAttendanceSession,
     getAttendanceSession,
+    getSessionRecords,
+    getQRCode,
     closeAttendanceSession,
     getMySessions,
     checkIn,
+    getStudentAttendance,
     getMyAttendance,
     getAttendanceReport,
     submitExcuseRequest,
+    submitExcuseRequestWithFile,
     getExcuseRequests,
     approveExcuseRequest,
     rejectExcuseRequest,

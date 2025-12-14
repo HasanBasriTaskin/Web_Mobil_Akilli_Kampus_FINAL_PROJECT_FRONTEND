@@ -53,7 +53,8 @@ export default function GiveAttendancePage() {
     }, [sessionId]);
 
     useEffect(() => {
-        if (session && (session.status === 'Active' || session.status === 'Aktif')) {
+        // Scheduled, Active veya Aktif durumlarında konum izni iste
+        if (session && ['Active', 'Aktif', 'Scheduled'].includes(session.status)) {
             requestLocationPermission();
         }
     }, [session]);
@@ -214,7 +215,9 @@ export default function GiveAttendancePage() {
     }
 
     const isWithinRange = distance !== null && distance <= session.geofenceRadius + 5;
-    const canCheckIn = location && isWithinRange && (session.status === 'Active' || session.status === 'Aktif');
+    // Scheduled, Active veya Aktif durumlarında yoklama verilebilir
+    const isSessionActive = ['Active', 'Aktif', 'Scheduled'].includes(session.status);
+    const canCheckIn = location && isWithinRange && isSessionActive;
 
     return (
         <div className="space-y-6">
@@ -225,7 +228,7 @@ export default function GiveAttendancePage() {
             >
                 <h1 className="text-3xl font-bold">Yoklama Ver</h1>
                 <p className="text-muted-foreground mt-2">
-                    {session.section?.course?.name || 'Ders'} - Grup {session.section?.sectionNumber}
+                    {session.courseName || session.section?.course?.name || 'Ders'} - Grup {session.sectionNumber || session.section?.sectionNumber}
                 </p>
             </motion.div>
 
@@ -242,7 +245,7 @@ export default function GiveAttendancePage() {
                         <Calendar className="size-5 text-primary" />
                         <div>
                             <p className="text-sm text-muted-foreground">Ders</p>
-                            <p className="font-medium">{session.section?.course?.name || 'Ders'}</p>
+                            <p className="font-medium">{session.courseName || session.section?.course?.name || 'Ders'}</p>
                         </div>
                     </div>
 
@@ -401,7 +404,7 @@ export default function GiveAttendancePage() {
             >
                 <Button
                     onClick={handleCheckIn}
-                    disabled={!canCheckIn || checkingIn || (session.status !== 'Active' && session.status !== 'Aktif')}
+                    disabled={!canCheckIn || checkingIn || !isSessionActive}
                     className="w-full gap-2"
                     size="lg"
                 >
@@ -410,7 +413,7 @@ export default function GiveAttendancePage() {
                             <Loader2 className="size-4 animate-spin" />
                             Yoklama veriliyor...
                         </>
-                    ) : (session.status !== 'Active' && session.status !== 'Aktif') ? (
+                    ) : !isSessionActive ? (
                         'Yoklama oturumu aktif değil'
                     ) : !location ? (
                         'Konum bekleniyor...'
@@ -429,7 +432,7 @@ export default function GiveAttendancePage() {
                     onClick={handleQRScan}
                     variant="outline"
                     className="w-full gap-2"
-                    disabled={checkingIn || (session.status !== 'Active' && session.status !== 'Aktif')}
+                    disabled={checkingIn || !isSessionActive}
                 >
                     <QrCode className="size-4" />
                     QR Kod ile Tarama

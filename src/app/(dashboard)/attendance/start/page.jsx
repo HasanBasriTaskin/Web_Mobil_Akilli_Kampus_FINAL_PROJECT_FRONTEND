@@ -71,8 +71,19 @@ export default function StartAttendancePage() {
             setLoading(true);
             const response = await getSections();
 
-            if (response.success) {
-                setSections(response.data?.items || response.data || []);
+            if (response.success && response.data) {
+                // Backend PagedResponse veya doğrudan array olabilir
+                let sectionsData;
+                if (Array.isArray(response.data)) {
+                    sectionsData = response.data;
+                } else if (response.data.data && Array.isArray(response.data.data)) {
+                    sectionsData = response.data.data;
+                } else if (response.data.items && Array.isArray(response.data.items)) {
+                    sectionsData = response.data.items;
+                } else {
+                    sectionsData = [];
+                }
+                setSections(sectionsData);
             } else {
                 // Mock data fallback
                 setSections(mockSections);
@@ -90,8 +101,8 @@ export default function StartAttendancePage() {
         try {
             const response = await getAttendanceSession(sessionId);
             if (response.success && response.data) {
-                // Mock: Backend'den gerçek sayı gelecek
-                setAttendanceCount(response.data.attendanceCount || Math.floor(Math.random() * 30) + 1);
+                // Backend'den gelen gerçek sayı
+                setAttendanceCount(response.data.presentCount || 0);
             }
         } catch (error) {
             console.error('Yoklama sayısı alınamadı:', error);
@@ -102,13 +113,38 @@ export default function StartAttendancePage() {
         try {
             setStarting(true);
 
+            // TimeSpan formatına çevir (HH:mm:ss)
+            const formatTimeSpan = (time) => {
+                if (!time) return null;
+                // "16:41" -> "16:41:00"
+                return time.includes(':') && time.split(':').length === 2
+                    ? `${time}:00`
+                    : time;
+            };
+
+            // endTime hesapla: sessionDuration dakika sonra
+            const calculateEndTime = (startTime, durationMinutes) => {
+                if (!startTime) return null;
+                const [hours, minutes] = startTime.split(':').map(Number);
+                const totalMinutes = hours * 60 + minutes + durationMinutes;
+                const endHours = Math.floor(totalMinutes / 60) % 24;
+                const endMins = totalMinutes % 60;
+                return `${String(endHours).padStart(2, '0')}:${String(endMins).padStart(2, '0')}:00`;
+            };
+
+            const startTimeFormatted = formatTimeSpan(data.startTime);
+            const endTimeFormatted = data.endTime
+                ? formatTimeSpan(data.endTime)
+                : calculateEndTime(data.startTime, parseInt(data.sessionDuration));
+
             const response = await createAttendanceSession({
                 sectionId: parseInt(data.sectionId),
                 date: data.date,
-                startTime: data.startTime,
-                endTime: data.endTime || null,
+                startTime: startTimeFormatted,
+                endTime: endTimeFormatted,
+                latitude: null, // Opsiyonel - daha sonra GPS'den alınabilir
+                longitude: null,
                 geofenceRadius: parseFloat(data.geofenceRadius),
-                sessionDuration: parseInt(data.sessionDuration),
             });
 
             if (response.success) {
@@ -261,7 +297,7 @@ export default function StartAttendancePage() {
                                                 <option value="">Grup seçiniz</option>
                                                 {sections.map((section) => (
                                                     <option key={section.id} value={section.id}>
-                                                        {section.course?.code} - Grup {section.sectionNumber} ({section.semester} {section.year})
+                                                        {section.courseCode || section.course?.code} - Grup {section.sectionNumber} ({section.semester} {section.year})
                                                     </option>
                                                 ))}
                                             </select>
