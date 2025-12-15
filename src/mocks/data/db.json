@@ -13,7 +13,7 @@
             "createdAt": "2024-01-15T10:30:00Z",
             "student": {
                 "studentNumber": "2021001234",
-                "departmentId": "dept_001",
+                "departmentId": 1,
                 "enrollmentDate": "2021-09-01T00:00:00Z"
             }
         },
@@ -31,7 +31,7 @@
             "faculty": {
                 "employeeNumber": "AKD2023001",
                 "title": "Profesör",
-                "departmentId": "dept_001",
+                "departmentId": 1,
                 "officeLocation": "A Blok 305"
             }
         },
@@ -60,26 +60,26 @@
             "createdAt": "2024-12-01T10:00:00Z",
             "student": {
                 "studentNumber": "2024005678",
-                "departmentId": "dept_002",
+                "departmentId": 2,
                 "enrollmentDate": "2024-09-01T00:00:00Z"
             }
         }
     ],
     "departments": [
         {
-            "id": "dept_001",
+            "id": 1,
             "name": "Bilgisayar Mühendisliği",
             "code": "BM",
             "facultyName": "Mühendislik Fakültesi"
         },
         {
-            "id": "dept_002",
+            "id": 2,
             "name": "Elektrik-Elektronik Mühendisliği",
             "code": "EE",
             "facultyName": "Mühendislik Fakültesi"
         },
         {
-            "id": "dept_003",
+            "id": 3,
             "name": "İşletme",
             "code": "ISL",
             "facultyName": "İktisadi ve İdari Bilimler Fakültesi"

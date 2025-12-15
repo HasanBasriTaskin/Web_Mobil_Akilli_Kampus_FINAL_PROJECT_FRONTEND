@@ -80,11 +80,11 @@ describe('RegisterForm', () => {
         await userEvent.type(screen.getByPlaceholderText(/Adınız Soyadınız/i), 'Ali Veli');
         await userEvent.type(screen.getByPlaceholderText(/ornek@smartcampus.edu/i), 'ali@edu.tr');
 
-        // Select Department (dept_001)
+        // Select Department (id: 1)
         // Need to find the select element. Since we have multiple, and it appears dynamically.
         // It's the one with option "Bilgisayar Mühendisliği" (from mockDb json if imported in component, or real file read)
         // The component uses `import mockDb from '@/mocks/data/db.json';`
-        // We verified db.json has "Bilgisayar Mühendisliği" with id "dept_001"
+        // We verified db.json has "Bilgisayar Mühendisliği" with id 1
 
         await waitFor(() => expect(screen.queryByText('Bölüm')).toBeInTheDocument());
 
@@ -94,13 +94,13 @@ describe('RegisterForm', () => {
         // Filter the one that has Department options.
         // Or just the first one usually.
         // Let's iterate or assume the first one after user type selection.
-        const departmentSelect = selects.find(select => select.innerHTML.includes('dept_001'));
+        const departmentSelect = selects.find(select => select.innerHTML.includes('1'));
 
         if (departmentSelect) {
-            await userEvent.selectOptions(departmentSelect, 'dept_001');
+            await userEvent.selectOptions(departmentSelect, '1');
         } else {
             // Fallback: try to select on the first visible select
-            await userEvent.selectOptions(selects[0], 'dept_001');
+            await userEvent.selectOptions(selects[0], '1');
         }
 
         // Student Number
@@ -119,7 +119,7 @@ describe('RegisterForm', () => {
                 fullName: 'Ali Veli',
                 email: 'ali@edu.tr',
                 userType: 'Student',
-                departmentId: 'dept_001',
+                departmentId: 1,
                 studentNumber: '12345',
                 password: 'Password123!',
             }));
@@ -137,8 +137,8 @@ describe('RegisterForm', () => {
         await userEvent.type(screen.getByPlaceholderText(/ornek@smartcampus.edu/i), 'ali@edu.tr');
 
         const selects = screen.getAllByRole('combobox');
-        const departmentSelect = selects.find(select => select.innerHTML.includes('dept_001')) || selects[0];
-        await userEvent.selectOptions(departmentSelect, 'dept_001');
+        const departmentSelect = selects.find(select => select.innerHTML.includes('1')) || selects[0];
+        await userEvent.selectOptions(departmentSelect, '1');
 
         await userEvent.type(screen.getByPlaceholderText('2024001234'), '12345');
 

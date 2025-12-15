@@ -36,11 +36,14 @@ export async function register(userData) {
 
 /**
  * Email doğrulama
+ * @param {string} userId - Kullanıcı ID'si
  * @param {string} token - Doğrulama token'ı
  * @returns {Promise<object>}
  */
-export async function verifyEmail(token) {
-    return post('/auth/verify-email', { token });
+export async function verifyEmail(userId, token) {
+    // Backend [FromQuery] kullanıyor, parametreleri URL'de gönderiyoruz
+    const params = new URLSearchParams({ userId, token });
+    return post(`/auth/verify-email?${params.toString()}`, {});
 }
 
 /**

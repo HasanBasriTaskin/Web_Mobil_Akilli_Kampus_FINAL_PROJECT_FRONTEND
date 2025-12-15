@@ -3,7 +3,7 @@ name: Deploy to Production
 on:
   push:
     branches:
-      - hasan
+      - main
 
 jobs:
   deploy:
@@ -16,6 +16,7 @@ jobs:
           host: ${{ secrets.SSH_HOST }}
           username: ${{ secrets.SSH_USER }}
           key: ${{ secrets.SSH_PRIVATE_KEY }}
+          passphrase: ${{ secrets.SSH_PASSPHRASE }}
           port: ${{ secrets.SSH_PORT }}
           script: |
             mkdir -p ~/MehmetFinalProje
@@ -25,10 +26,10 @@ jobs:
             if [ -d "frontend/.git" ]; then
               cd frontend
               git fetch origin
-              git reset --hard origin/hasan
+              git reset --hard origin/main
             else
               rm -rf frontend
-              git clone -b hasan https://${{ secrets.GH_TOKEN }}@github.com/HasanBasriTaskin/Web_Mobil_Akilli_Kampus_FINAL_PROJECT_FRONTEND.git frontend
+              git clone -b main https://${{ secrets.GH_TOKEN }}@github.com/HasanBasriTaskin/Web_Mobil_Akilli_Kampus_FINAL_PROJECT_FRONTEND.git frontend
               cd frontend
             fi
             

@@ -52,9 +52,9 @@ export const registerSchema = z.object({
         .string()
         .optional(),
 
-    // Common
+    // Common - Backend int bekliyor
     departmentId: z
-        .string()
+        .coerce.number()
         .optional(),
 
 }).superRefine((data, ctx) => {
@@ -76,7 +76,7 @@ export const registerSchema = z.object({
                 path: ['studentNumber'],
             });
         }
-        if (!data.departmentId || data.departmentId.length === 0) {
+        if (!data.departmentId || data.departmentId <= 0) {
             ctx.addIssue({
                 code: z.ZodIssueCode.custom,
                 message: 'Bölüm seçimi zorunludur',
@@ -101,7 +101,7 @@ export const registerSchema = z.object({
                 path: ['title'],
             });
         }
-        if (!data.departmentId || data.departmentId.length === 0) {
+        if (!data.departmentId || data.departmentId <= 0) {
             ctx.addIssue({
                 code: z.ZodIssueCode.custom,
                 message: 'Bölüm seçimi zorunludur',
@@ -124,7 +124,7 @@ export const registerDefaultValues = {
     employeeNumber: '',
     title: '',
     officeLocation: '',
-    departmentId: '',
+    departmentId: 0,
 };
 
 /**
