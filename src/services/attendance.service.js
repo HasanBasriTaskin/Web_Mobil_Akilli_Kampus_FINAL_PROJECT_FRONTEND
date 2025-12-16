@@ -1,125 +1,83 @@
 /**
- * Attendance Service
- * API Dokümantasyonuna uygun - 7. Attendance Controller
- * 
- * Base Path: /api/v1/Attendance
- * - POST /sessions - Oturum oluştur
- * - GET /sessions/{id} - Oturum detayı
- * - GET /sessions/{id}/records - Oturum kayıtları
- * - GET /sessions/{id}/qr-code - QR kod
- * - PUT /sessions/{id}/close - Oturum kapat
- * - POST /sessions/{id}/checkin - Yoklama ver
- * - GET /sessions/my-sessions - Benim oturumlarım
- * - GET /students/{studentId} - Öğrenci yoklamaları
- * - GET /report/{sectionId} - Rapor
- * - GET /my-attendance - Benim yoklamam
- * 
- * Excuse Requests Base Path: /api/v1/attendance/excuse-requests
+ * Attendance Service - Yoklama işlemleri için API servisi
  */
 
 import { get, post, put, postFormData } from './api-client';
 
+// ==================== SESSION MANAGEMENT (Faculty) ====================
+
 /**
- * Yoklama oturumu açma (Faculty)
- * POST /api/v1/Attendance/sessions
+ * Yeni yoklama oturumu oluştur
+ * @param {object} sessionData - { sectionId, date, startTime, endTime, latitude, longitude, geofenceRadius }
  */
-export async function createAttendanceSession(sessionData) {
-    return post('/Attendance/sessions', sessionData);
+export async function createSession(sessionData) {
+    return post('/attendance/sessions', sessionData);
 }
 
 /**
- * Oturum detayları
- * GET /api/v1/Attendance/sessions/{sessionId}
+ * Oturum detaylarını getir
+ * @param {number} sessionId 
  */
-export async function getAttendanceSession(sessionId) {
-    return get(`/Attendance/sessions/${sessionId}`);
+export async function getSessionById(sessionId) {
+    return get(`/attendance/sessions/${sessionId}`);
 }
 
 /**
- * Oturum kayıtları - katılan öğrenciler (Faculty)
- * GET /api/v1/Attendance/sessions/{sessionId}/records
+ * Oturumu kapat
+ * @param {number} sessionId 
  */
-export async function getSessionRecords(sessionId) {
-    return get(`/Attendance/sessions/${sessionId}/records`);
+export async function closeSession(sessionId) {
+    return put(`/attendance/sessions/${sessionId}/close`);
 }
 
 /**
- * QR kod bilgisi
- * GET /api/v1/Attendance/sessions/{sessionId}/qr-code
- */
-export async function getQRCode(sessionId) {
-    return get(`/Attendance/sessions/${sessionId}/qr-code`);
-}
-
-/**
- * Oturumu kapatma (Faculty)
- * PUT /api/v1/Attendance/sessions/{id}/close
- */
-export async function closeAttendanceSession(sessionId) {
-    return put(`/Attendance/sessions/${sessionId}/close`, {});
-}
-
-/**
- * Benim oturumlarım (Faculty)
- * GET /api/v1/Attendance/sessions/my-sessions
+ * Instructor'ın oturumlarını getir
  */
 export async function getMySessions() {
-    return get('/Attendance/sessions/my-sessions');
+    return get('/attendance/sessions/my-sessions');
 }
 
 /**
- * Yoklama verme (Student)
- * POST /api/v1/Attendance/sessions/{sessionId}/checkin
+ * Oturum kayıtlarını getir
+ * @param {number} sessionId 
+ */
+export async function getSessionRecords(sessionId) {
+    return get(`/attendance/sessions/${sessionId}/records`);
+}
+
+// ==================== STUDENT CHECK-IN ====================
+
+/**
+ * Yoklamaya katıl (GPS ile)
+ * @param {number} sessionId 
+ * @param {object} locationData - { latitude, longitude, accuracy }
  */
 export async function checkIn(sessionId, locationData) {
-    return post(`/Attendance/sessions/${sessionId}/checkin`, locationData);
+    return post(`/attendance/sessions/${sessionId}/checkin`, locationData);
 }
 
 /**
- * Öğrenci yoklamaları
- * GET /api/v1/Attendance/students/{studentId}
- */
-export async function getStudentAttendance(studentId) {
-    return get(`/Attendance/students/${studentId}`);
-}
-
-/**
- * Yoklama durumum (Student)
- * GET /api/v1/Attendance/my-attendance
+ * Öğrencinin yoklama istatistiklerini getir
  */
 export async function getMyAttendance() {
-    return get('/Attendance/my-attendance');
+    return get('/attendance/my-attendance');
+}
+
+// ==================== EXCUSE REQUESTS ====================
+
+/**
+ * Mazeret talebi oluştur
+ * @param {object} requestData - { sessionId, reason }
+ */
+export async function createExcuseRequest(requestData) {
+    return post('/attendance/excuse-requests', requestData);
 }
 
 /**
- * Yoklama raporu (Faculty)
- * GET /api/v1/Attendance/report/{sectionId}
+ * Mazeret dosyası ile birlikte talep oluştur
+ * @param {object} excuseData - { sessionId, reason, document (File) }
  */
-export async function getAttendanceReport(sectionId) {
-    return get(`/Attendance/report/${sectionId}`);
-}
-
-// ============================================
-// EXCUSE REQUESTS - Base: /api/v1/attendance/excuse-requests
-// ============================================
-
-/**
- * Mazeret talebi oluşturma (Student)
- * POST /api/v1/attendance/excuse-requests
- */
-export async function submitExcuseRequest(excuseData) {
-    // Dokümantasyona göre JSON body (documentUrl string olarak)
-    return post('/attendance/excuse-requests', {
-        sessionId: excuseData.sessionId,
-        reason: excuseData.reason,
-        documentUrl: excuseData.documentUrl || null,
-    });
-}
-
-/**
- * Mazeret talebi oluşturma (FormData ile dosya yükleme)
- */
-export async function submitExcuseRequestWithFile(excuseData) {
+export async function submitExcuseWithFile(excuseData) {
     const formData = new FormData();
     formData.append('sessionId', excuseData.sessionId);
     formData.append('reason', excuseData.reason);
@@ -132,44 +90,65 @@ export async function submitExcuseRequestWithFile(excuseData) {
 }
 
 /**
- * Mazeret listesi (Faculty)
- * GET /api/v1/attendance/excuse-requests
+ * Mazeret taleplerini getir (Faculty)
+ * @param {number} sectionId - Opsiyonel filtre
  */
-export async function getExcuseRequests() {
-    return get('/attendance/excuse-requests');
+export async function getExcuseRequests(sectionId = null) {
+    const query = sectionId ? `?sectionId=${sectionId}` : '';
+    return get(`/attendance/excuse-requests${query}`);
 }
 
 /**
- * Mazeret onaylama (Faculty)
- * PUT /api/v1/attendance/excuse-requests/{id}/approve
+ * Mazeret talebini onayla
+ * @param {number} requestId 
+ * @param {object} reviewData - { notes }
  */
-export async function approveExcuseRequest(requestId, data = {}) {
-    return put(`/attendance/excuse-requests/${requestId}/approve`, data);
+export async function approveExcuseRequest(requestId, reviewData = {}) {
+    return put(`/attendance/excuse-requests/${requestId}/approve`, reviewData);
 }
 
 /**
- * Mazeret reddetme (Faculty)
- * PUT /api/v1/attendance/excuse-requests/{id}/reject
+ * Mazeret talebini reddet
+ * @param {number} requestId 
+ * @param {object} reviewData - { notes }
  */
-export async function rejectExcuseRequest(requestId, data = {}) {
-    return put(`/attendance/excuse-requests/${requestId}/reject`, data);
+export async function rejectExcuseRequest(requestId, reviewData = {}) {
+    return put(`/attendance/excuse-requests/${requestId}/reject`, reviewData);
+}
+
+// ==================== GPS UTILITIES ====================
+
+/**
+ * İki koordinat arasındaki mesafeyi hesapla (Haversine - metre)
+ */
+export function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371000; // Dünya yarıçapı (m)
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+}
+
+function toRad(deg) {
+    return deg * (Math.PI / 180);
 }
 
 export default {
-    createAttendanceSession,
-    getAttendanceSession,
-    getSessionRecords,
-    getQRCode,
-    closeAttendanceSession,
+    createSession,
+    getSessionById,
+    closeSession,
     getMySessions,
+    getSessionRecords,
     checkIn,
-    getStudentAttendance,
     getMyAttendance,
-    getAttendanceReport,
-    submitExcuseRequest,
-    submitExcuseRequestWithFile,
+    createExcuseRequest,
+    submitExcuseWithFile,
     getExcuseRequests,
     approveExcuseRequest,
     rejectExcuseRequest,
+    calculateDistance
 };
-

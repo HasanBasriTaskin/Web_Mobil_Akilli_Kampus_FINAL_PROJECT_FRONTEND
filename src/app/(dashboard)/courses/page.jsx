@@ -49,28 +49,21 @@ export default function CoursesPage() {
 
             const response = await getCourses(params);
 
-            if (response.success && response.data) {
-                // Backend PagedResponse formatı: { data: [...], pageNumber, pageSize, totalPages, totalRecords, hasNext, hasPrevious }
-                // veya doğrudan array olabilir
-
-                if (Array.isArray(response.data)) {
-                    // Doğrudan array döndüyse
-                    setCourses(response.data);
-                    setTotalRecords(response.data.length);
-                    setTotalPages(1);
-                    setHasNext(false);
-                    setHasPrevious(false);
-                } else if (response.data.data && Array.isArray(response.data.data)) {
-                    // PagedResponse formatı (nested data)
-                    setCourses(response.data.data);
-                    setTotalPages(response.data.totalPages || 1);
-                    setTotalRecords(response.data.totalRecords || response.data.data.length);
-                    setHasNext(response.data.hasNext || false);
-                    setHasPrevious(response.data.hasPrevious || false);
-                } else {
-                    // PagedResponse formatı (flat - api-client normalizes)
-                    const coursesData = response.data;
-                    setCourses(Array.isArray(coursesData) ? coursesData : []);
+            if (response.success) {
+                setCourses(response.data?.items || response.data || []);
+            } else {
+                // Mock data fallback
+                let filteredCourses = [...mockCourses];
+                if (searchTerm) {
+                    filteredCourses = filteredCourses.filter(c =>
+                        c.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                        c.name.toLowerCase().includes(searchTerm.toLowerCase())
+                    );
+                }
+                if (departmentFilter) {
+                    filteredCourses = filteredCourses.filter(c =>
+                        c.department.id === parseInt(departmentFilter)
+                    );
                 }
             } else {
                 // API başarısız - Mock data fallback
@@ -78,7 +71,19 @@ export default function CoursesPage() {
             }
         } catch (error) {
             console.error('Dersler yüklenemedi, mock data kullanılıyor:', error);
-            handleMockDataFallback();
+            let filteredCourses = [...mockCourses];
+            if (searchTerm) {
+                filteredCourses = filteredCourses.filter(c =>
+                    c.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
+                    c.name.toLowerCase().includes(searchTerm.toLowerCase())
+                );
+            }
+            if (departmentFilter) {
+                filteredCourses = filteredCourses.filter(c =>
+                    c.department.id === parseInt(departmentFilter)
+                );
+            }
+            setCourses(filteredCourses);
         } finally {
             setLoading(false);
         }
