@@ -15,12 +15,18 @@ import {
     FileText,
     X,
     GraduationCap,
+<<<<<<< Updated upstream
     GraduationCap as MyCoursesIcon,
     Award,
     ClipboardCheck,
     MapPin,
     FileCheck,
     NotebookPen,
+=======
+    ClipboardList,
+    MapPin,
+    BarChart3
+>>>>>>> Stashed changes
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth.store';
@@ -47,21 +53,29 @@ const navItems = [
         icon: Users,
         roles: ['Admin']
     },
+    // Academic Management
     {
-        title: 'Dersler',
+        title: 'Ders Kataloğu',
         href: '/courses',
         icon: BookOpen,
-        roles: ['Student', 'Faculty']
+        roles: ['Student', 'Faculty', 'Admin']
     },
     {
+<<<<<<< Updated upstream
         title: 'Kayıtlı Derslerim',
         href: '/my-courses',
         icon: MyCoursesIcon,
+=======
+        title: 'Derslerim',
+        href: '/my-courses',
+        icon: ClipboardList,
+>>>>>>> Stashed changes
         roles: ['Student']
     },
     {
         title: 'Notlarım',
         href: '/grades',
+<<<<<<< Updated upstream
         icon: Award,
         roles: ['Student']
     },
@@ -71,6 +85,19 @@ const navItems = [
         icon: ClipboardCheck,
         roles: ['Student']
     },
+=======
+        icon: BarChart3,
+        roles: ['Student']
+    },
+    // Attendance - Student
+    {
+        title: 'Devam Durumum',
+        href: '/my-attendance',
+        icon: MapPin,
+        roles: ['Student']
+    },
+    // Attendance - Faculty
+>>>>>>> Stashed changes
     {
         title: 'Yoklama Başlat',
         href: '/attendance/start',
@@ -78,6 +105,7 @@ const navItems = [
         roles: ['Faculty']
     },
     {
+<<<<<<< Updated upstream
         title: 'Yoklama Raporları',
         href: '/attendance/reports',
         icon: ClipboardCheck,
@@ -87,14 +115,26 @@ const navItems = [
         title: 'Not Girişi',
         href: '/gradebook',
         icon: NotebookPen,
+=======
+        title: 'Kayıt Talepleri',
+        href: '/enrollment-requests',
+        icon: Users,
+>>>>>>> Stashed changes
         roles: ['Faculty']
     },
     {
         title: 'Mazeret Talepleri',
         href: '/excuse-requests',
+<<<<<<< Updated upstream
         icon: FileCheck,
         roles: ['Faculty', 'Student']
     },
+=======
+        icon: FileText,
+        roles: ['Faculty']
+    },
+    // Others
+>>>>>>> Stashed changes
     {
         title: 'Takvim',
         href: '/calendar',
@@ -112,12 +152,6 @@ const navItems = [
         href: '/notifications',
         icon: Bell,
         roles: ['Student', 'Faculty', 'Admin']
-    },
-    {
-        title: 'Dökümanlar',
-        href: '/documents',
-        icon: FileText,
-        roles: ['Student', 'Faculty']
     },
     {
         title: 'Ayarlar',

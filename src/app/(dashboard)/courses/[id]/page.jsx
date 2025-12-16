@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useParams, useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import {
+<<<<<<< Updated upstream
     BookOpen,
     Clock,
     GraduationCap,
@@ -28,10 +29,90 @@ import { mockCourses, mockSections } from '@/mocks/academic.mock';
 /**
  * Course Detail Page
  * Ders detayları - modern ve güzel tasarım
+=======
+    BookOpen, ArrowLeft, Clock, GraduationCap, Users,
+    Calendar, MapPin, ChevronRight, AlertCircle, Check
+} from 'lucide-react';
+import Link from 'next/link';
+import { getCourseById, getPrerequisites } from '@/services/course.service';
+import { enrollInCourse, checkPrerequisites, checkScheduleConflict } from '@/services/enrollment.service';
+import { toast } from 'sonner';
+
+/**
+ * Section Card Component
+ */
+function SectionCard({ section, onEnroll }) {
+    const [enrolling, setEnrolling] = useState(false);
+
+    async function handleEnroll() {
+        setEnrolling(true);
+        try {
+            // Önkoşul kontrolü
+            const prereqCheck = await checkPrerequisites(section.courseId);
+            if (!prereqCheck.success) {
+                toast.error(prereqCheck.message || 'Önkoşul kontrolü başarısız');
+                return;
+            }
+
+            // Çakışma kontrolü
+            const conflictCheck = await checkScheduleConflict(section.id);
+            if (!conflictCheck.success) {
+                toast.error(conflictCheck.message || 'Çakışma kontrolü başarısız');
+                return;
+            }
+
+            // Kayıt ol
+            await enrollInCourse(section.id);
+            toast.success('Derse başarıyla kayıt oldunuz!');
+            onEnroll?.();
+        } catch (error) {
+            toast.error(error.message || 'Kayıt başarısız');
+        } finally {
+            setEnrolling(false);
+        }
+    }
+
+    return (
+        <div className="p-4 rounded-lg border border-border bg-background hover:bg-accent/50 transition-colors">
+            <div className="flex items-center justify-between">
+                <div>
+                    <p className="font-medium">Seksiyon {section.sectionNumber}</p>
+                    <p className="text-sm text-muted-foreground">{section.instructorName}</p>
+                </div>
+                <div className="text-right">
+                    <p className="text-sm font-medium">
+                        {section.availableSeats} / {section.capacity} kişilik
+                    </p>
+                    <p className="text-xs text-muted-foreground">{section.semester} {section.year}</p>
+                </div>
+            </div>
+
+            {section.scheduleJson && (
+                <div className="mt-3 flex items-center gap-2 text-sm text-muted-foreground">
+                    <Calendar className="size-4" />
+                    <span>Haftalık Program</span>
+                </div>
+            )}
+
+            <button
+                onClick={handleEnroll}
+                disabled={enrolling || section.availableSeats === 0}
+                className="mt-4 w-full py-2 px-4 rounded-lg bg-primary text-primary-foreground font-medium hover:bg-primary/90 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+            >
+                {enrolling ? 'Kayıt yapılıyor...' : section.availableSeats === 0 ? 'Dolu' : 'Kayıt Ol'}
+            </button>
+        </div>
+    );
+}
+
+/**
+ * Course Detail Page
+>>>>>>> Stashed changes
  */
 export default function CourseDetailPage() {
     const params = useParams();
     const router = useRouter();
+<<<<<<< Updated upstream
     const { user } = useAuthStore();
     const courseId = params.id;
 
@@ -83,11 +164,34 @@ export default function CourseDetailPage() {
                 });
                 router.push('/courses');
             }
+=======
+    const [course, setCourse] = useState(null);
+    const [prerequisites, setPrerequisites] = useState([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        loadCourseDetails();
+    }, [params.id]);
+
+    async function loadCourseDetails() {
+        try {
+            setLoading(true);
+            const [courseRes, prereqRes] = await Promise.all([
+                getCourseById(params.id),
+                getPrerequisites(params.id)
+            ]);
+            setCourse(courseRes.data);
+            setPrerequisites(prereqRes.data || []);
+        } catch (error) {
+            toast.error('Ders bilgileri yüklenemedi');
+            console.error(error);
+>>>>>>> Stashed changes
         } finally {
             setLoading(false);
         }
     }
 
+<<<<<<< Updated upstream
     function handleEnrollClick(section) {
         setSelectedSection(section);
         setShowEnrollModal(true);
@@ -122,17 +226,37 @@ export default function CourseDetailPage() {
         return (
             <div className="flex items-center justify-center py-12">
                 <div className="text-muted-foreground">Yükleniyor...</div>
+=======
+    if (loading) {
+        return (
+            <div className="space-y-6">
+                <div className="h-8 w-48 bg-muted animate-pulse rounded" />
+                <div className="h-64 bg-muted animate-pulse rounded-xl" />
+>>>>>>> Stashed changes
             </div>
         );
     }
 
     if (!course) {
+<<<<<<< Updated upstream
         return null;
+=======
+        return (
+            <div className="text-center py-12">
+                <AlertCircle className="size-12 mx-auto text-muted-foreground" />
+                <h3 className="mt-4 text-lg font-medium">Ders bulunamadı</h3>
+                <Link href="/courses" className="text-primary hover:underline">
+                    Ders kataloğuna dön
+                </Link>
+            </div>
+        );
+>>>>>>> Stashed changes
     }
 
     return (
         <div className="space-y-6">
             {/* Back Button */}
+<<<<<<< Updated upstream
             <Link href="/courses">
                 <Button variant="ghost" className="gap-2 hover:bg-slate-100 dark:hover:bg-slate-800">
                     <ArrowLeft className="size-4" />
@@ -170,12 +294,44 @@ export default function CourseDetailPage() {
                                         <span className="font-medium">{course.ects} ECTS</span>
                                     </div>
                                 )}
+=======
+            <button
+                onClick={() => router.back()}
+                className="flex items-center gap-2 text-muted-foreground hover:text-foreground transition-colors"
+            >
+                <ArrowLeft className="size-4" />
+                <span>Geri</span>
+            </button>
+
+            {/* Course Header */}
+            <motion.div
+                initial={{ opacity: 0, y: -20 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="p-6 rounded-xl bg-gradient-to-br from-violet-500 via-indigo-500 to-purple-600 text-white"
+            >
+                <div className="flex items-start gap-4">
+                    <div className="p-4 rounded-xl bg-white/20">
+                        <BookOpen className="size-8" />
+                    </div>
+                    <div className="flex-1">
+                        <p className="text-white/80 font-medium">{course.code}</p>
+                        <h1 className="text-2xl lg:text-3xl font-bold mt-1">{course.name}</h1>
+                        <div className="flex flex-wrap gap-4 mt-4 text-white/80">
+                            <div className="flex items-center gap-1">
+                                <GraduationCap className="size-4" />
+                                <span>{course.departmentName}</span>
+                            </div>
+                            <div className="flex items-center gap-1">
+                                <Clock className="size-4" />
+                                <span>{course.credits} Kredi - {course.ects} ECTS</span>
+>>>>>>> Stashed changes
                             </div>
                         </div>
                     </div>
                 </div>
             </motion.div>
 
+<<<<<<< Updated upstream
             {/* Course Description */}
             {course.description && (
                 <motion.div
@@ -194,10 +350,58 @@ export default function CourseDetailPage() {
 
             {/* Prerequisites */}
             {course.prerequisites && course.prerequisites.length > 0 && (
+=======
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Course Info */}
+                <div className="lg:col-span-2 space-y-6">
+                    {/* Description */}
+                    <motion.div
+                        initial={{ opacity: 0, y: 20 }}
+                        animate={{ opacity: 1, y: 0 }}
+                        className="p-6 rounded-xl bg-white dark:bg-slate-800/50 border border-border"
+                    >
+                        <h2 className="text-lg font-semibold mb-3">Ders Açıklaması</h2>
+                        <p className="text-muted-foreground">
+                            {course.description || 'Açıklama bulunmuyor.'}
+                        </p>
+                    </motion.div>
+
+                    {/* Prerequisites */}
+                    {prerequisites.length > 0 && (
+                        <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.1 }}
+                            className="p-6 rounded-xl bg-white dark:bg-slate-800/50 border border-border"
+                        >
+                            <h2 className="text-lg font-semibold mb-3">Önkoşullar</h2>
+                            <div className="space-y-2">
+                                {prerequisites.map((prereq) => (
+                                    <Link
+                                        key={prereq.courseId}
+                                        href={`/courses/${prereq.courseId}`}
+                                        className="flex items-center justify-between p-3 rounded-lg bg-amber-50 dark:bg-amber-900/20 hover:bg-amber-100 dark:hover:bg-amber-900/30 transition-colors"
+                                    >
+                                        <div className="flex items-center gap-2">
+                                            <AlertCircle className="size-4 text-amber-600" />
+                                            <span className="font-medium">{prereq.courseCode}</span>
+                                            <span className="text-muted-foreground">- {prereq.courseName}</span>
+                                        </div>
+                                        <ChevronRight className="size-4 text-muted-foreground" />
+                                    </Link>
+                                ))}
+                            </div>
+                        </motion.div>
+                    )}
+                </div>
+
+                {/* Sections */}
+>>>>>>> Stashed changes
                 <motion.div
                     initial={{ opacity: 0, y: 20 }}
                     animate={{ opacity: 1, y: 0 }}
                     transition={{ delay: 0.2 }}
+<<<<<<< Updated upstream
                     className="p-6 rounded-xl bg-white dark:bg-slate-800/50 border border-border shadow-sm"
                 >
                     <h2 className="text-lg font-semibold mb-4 flex items-center gap-2">
@@ -490,6 +694,28 @@ export default function CourseDetailPage() {
                     </motion.div>
                 </div>
             )}
+=======
+                    className="p-6 rounded-xl bg-white dark:bg-slate-800/50 border border-border"
+                >
+                    <h2 className="text-lg font-semibold mb-4">Mevcut Seksiyonlar</h2>
+                    <div className="space-y-4">
+                        {course.sections?.length > 0 ? (
+                            course.sections.map((section) => (
+                                <SectionCard
+                                    key={section.id}
+                                    section={section}
+                                    onEnroll={loadCourseDetails}
+                                />
+                            ))
+                        ) : (
+                            <p className="text-muted-foreground text-center py-4">
+                                Mevcut seksiyon bulunmuyor
+                            </p>
+                        )}
+                    </div>
+                </motion.div>
+            </div>
+>>>>>>> Stashed changes
         </div>
     );
 }

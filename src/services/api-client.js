@@ -24,9 +24,18 @@ async function request(endpoint, options = {}) {
 
     // Token varsa header'a ekle
     if (typeof window !== 'undefined') {
-        const token = localStorage.getItem('accessToken');
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
+        // Zustand auth store uses 'auth-storage' key with JSON structure
+        const authStorage = localStorage.getItem('auth-storage');
+        if (authStorage) {
+            try {
+                const parsed = JSON.parse(authStorage);
+                const token = parsed?.state?.accessToken;
+                if (token) {
+                    config.headers.Authorization = `Bearer ${token}`;
+                }
+            } catch (e) {
+                console.error('Failed to parse auth storage:', e);
+            }
         }
     }
 
@@ -130,12 +139,21 @@ export async function postFormData(endpoint, formData, options = {}) {
 
     // Token varsa header'a ekle
     if (typeof window !== 'undefined') {
-        const token = localStorage.getItem('accessToken');
-        if (token) {
-            config.headers = {
-                ...config.headers,
-                Authorization: `Bearer ${token}`,
-            };
+        // Zustand auth store uses 'auth-storage' key with JSON structure
+        const authStorage = localStorage.getItem('auth-storage');
+        if (authStorage) {
+            try {
+                const parsed = JSON.parse(authStorage);
+                const token = parsed?.state?.accessToken;
+                if (token) {
+                    config.headers = {
+                        ...config.headers,
+                        Authorization: `Bearer ${token}`,
+                    };
+                }
+            } catch (e) {
+                console.error('Failed to parse auth storage:', e);
+            }
         }
     }
 
