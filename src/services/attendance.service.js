@@ -63,6 +63,19 @@ export async function getMyAttendance() {
     return get('/attendance/my-attendance');
 }
 
+/**
+ * Section için yoklama raporunu getir (Faculty)
+ * @param {number} sectionId 
+ * @param {object} filters - { startDate, endDate }
+ */
+export async function getAttendanceReport(sectionId, filters = {}) {
+    const params = new URLSearchParams();
+    if (filters.startDate) params.append('startDate', filters.startDate);
+    if (filters.endDate) params.append('endDate', filters.endDate);
+    const query = params.toString() ? `?${params.toString()}` : '';
+    return get(`/attendance/sections/${sectionId}/report${query}`);
+}
+
 // ==================== EXCUSE REQUESTS ====================
 
 /**
@@ -145,6 +158,7 @@ export default {
     getSessionRecords,
     checkIn,
     getMyAttendance,
+    getAttendanceReport,
     createExcuseRequest,
     submitExcuseWithFile,
     getExcuseRequests,
