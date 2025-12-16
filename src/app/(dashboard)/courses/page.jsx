@@ -2,7 +2,6 @@
 
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
-<<<<<<< Updated upstream
 import { Search, BookOpen, Clock, ArrowRight, Grid3x3, List, ChevronLeft, ChevronRight } from 'lucide-react';
 import Link from 'next/link';
 
@@ -47,96 +46,29 @@ export default function CoursesPage() {
             setDepartments(mockDepartments);
         }
     }
-=======
-import { BookOpen, Search, Filter, GraduationCap, Clock, ChevronRight } from 'lucide-react';
-import Link from 'next/link';
-import { getCourses } from '@/services/course.service';
-import { toast } from 'sonner';
-
-/**
- * Course Card Component
- */
-function CourseCard({ course }) {
-    return (
-        <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            whileHover={{ scale: 1.02 }}
-            className="group p-6 rounded-xl bg-white dark:bg-slate-800/50 border border-border shadow-sm hover:shadow-lg transition-all"
-        >
-            <div className="flex items-start justify-between">
-                <div className="p-3 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600">
-                    <BookOpen className="size-6 text-white" />
-                </div>
-                <span className="px-3 py-1 text-xs font-medium rounded-full bg-primary/10 text-primary">
-                    {course.credits} Kredi
-                </span>
-            </div>
-
-            <div className="mt-4">
-                <p className="text-sm font-medium text-muted-foreground">{course.code}</p>
-                <h3 className="mt-1 text-lg font-semibold line-clamp-2">{course.name}</h3>
-            </div>
-
-            <div className="mt-4 flex items-center gap-4 text-sm text-muted-foreground">
-                <div className="flex items-center gap-1">
-                    <GraduationCap className="size-4" />
-                    <span>{course.departmentName}</span>
-                </div>
-                <div className="flex items-center gap-1">
-                    <Clock className="size-4" />
-                    <span>{course.ects} ECTS</span>
-                </div>
-            </div>
-
-            <Link
-                href={`/courses/${course.id}`}
-                className="mt-4 flex items-center justify-between text-sm font-medium text-primary hover:underline"
-            >
-                <span>Detayları Görüntüle</span>
-                <ChevronRight className="size-4 group-hover:translate-x-1 transition-transform" />
-            </Link>
-        </motion.div>
-    );
-}
-
-/**
- * Course Catalog Page
- */
-export default function CoursesPage() {
-    const [courses, setCourses] = useState([]);
-    const [loading, setLoading] = useState(true);
-    const [search, setSearch] = useState('');
-    const [departmentFilter, setDepartmentFilter] = useState('');
-
-    useEffect(() => {
-        loadCourses();
-    }, [search, departmentFilter]);
->>>>>>> Stashed changes
 
     async function loadCourses() {
         try {
             setLoading(true);
-<<<<<<< Updated upstream
             const params = {};
             if (searchTerm) params.search = searchTerm;
             if (departmentFilter) params.departmentId = departmentFilter;
 
             const response = await getCourses(params);
-            
+
             if (response.success) {
                 setCourses(response.data?.items || response.data || []);
             } else {
                 // Mock data fallback
                 let filteredCourses = [...mockCourses];
                 if (searchTerm) {
-                    filteredCourses = filteredCourses.filter(c => 
+                    filteredCourses = filteredCourses.filter(c =>
                         c.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
                         c.name.toLowerCase().includes(searchTerm.toLowerCase())
                     );
                 }
                 if (departmentFilter) {
-                    filteredCourses = filteredCourses.filter(c => 
+                    filteredCourses = filteredCourses.filter(c =>
                         c.department.id === parseInt(departmentFilter)
                     );
                 }
@@ -147,33 +79,22 @@ export default function CoursesPage() {
             console.error('Dersler yüklenemedi, mock data kullanılıyor:', error);
             let filteredCourses = [...mockCourses];
             if (searchTerm) {
-                filteredCourses = filteredCourses.filter(c => 
+                filteredCourses = filteredCourses.filter(c =>
                     c.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
                     c.name.toLowerCase().includes(searchTerm.toLowerCase())
                 );
             }
             if (departmentFilter) {
-                filteredCourses = filteredCourses.filter(c => 
+                filteredCourses = filteredCourses.filter(c =>
                     c.department.id === parseInt(departmentFilter)
                 );
             }
             setCourses(filteredCourses);
-=======
-            const response = await getCourses({
-                search,
-                departmentId: departmentFilter || undefined
-            });
-            setCourses(response.data || []);
-        } catch (error) {
-            toast.error('Dersler yüklenemedi');
-            console.error(error);
->>>>>>> Stashed changes
         } finally {
             setLoading(false);
         }
     }
 
-<<<<<<< Updated upstream
     function handleSearch(e) {
         e.preventDefault();
         setCurrentPage(1);
@@ -186,15 +107,12 @@ export default function CoursesPage() {
     const endIndex = startIndex + itemsPerPage;
     const paginatedCourses = courses.slice(startIndex, endIndex);
 
-=======
->>>>>>> Stashed changes
     return (
         <div className="space-y-6">
             {/* Header */}
             <motion.div
                 initial={{ opacity: 0, y: -20 }}
                 animate={{ opacity: 1, y: 0 }}
-<<<<<<< Updated upstream
             >
                 <h1 className="text-3xl font-bold">Ders Kataloğu</h1>
                 <p className="text-muted-foreground mt-2">
@@ -274,63 +192,12 @@ export default function CoursesPage() {
             ) : viewMode === 'grid' ? (
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {paginatedCourses.map((course, index) => (
-=======
-                className="flex flex-col lg:flex-row lg:items-center lg:justify-between gap-4"
-            >
-                <div>
-                    <h1 className="text-2xl lg:text-3xl font-bold">Ders Kataloğu</h1>
-                    <p className="text-muted-foreground mt-1">Tüm dersleri görüntüle ve kayıt ol</p>
-                </div>
-
-                {/* Search & Filter */}
-                <div className="flex flex-col sm:flex-row gap-3">
-                    <div className="relative">
-                        <Search className="absolute left-3 top-1/2 -translate-y-1/2 size-4 text-muted-foreground" />
-                        <input
-                            type="text"
-                            placeholder="Ders ara..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            className="pl-10 pr-4 py-2 w-full sm:w-64 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
-                        />
-                    </div>
-                    <select
-                        value={departmentFilter}
-                        onChange={(e) => setDepartmentFilter(e.target.value)}
-                        className="px-4 py-2 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
-                    >
-                        <option value="">Tüm Bölümler</option>
-                        <option value="1">Bilgisayar Mühendisliği</option>
-                        <option value="2">Elektrik Mühendisliği</option>
-                        <option value="3">Makine Mühendisliği</option>
-                    </select>
-                </div>
-            </motion.div>
-
-            {/* Course Grid */}
-            {loading ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {[...Array(6)].map((_, i) => (
-                        <div key={i} className="p-6 rounded-xl bg-muted animate-pulse h-52" />
-                    ))}
-                </div>
-            ) : courses.length === 0 ? (
-                <div className="text-center py-12">
-                    <BookOpen className="size-12 mx-auto text-muted-foreground" />
-                    <h3 className="mt-4 text-lg font-medium">Ders bulunamadı</h3>
-                    <p className="text-muted-foreground">Arama kriterlerinizi değiştirin</p>
-                </div>
-            ) : (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                    {courses.map((course, index) => (
->>>>>>> Stashed changes
                         <motion.div
                             key={course.id}
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: index * 0.05 }}
                         >
-<<<<<<< Updated upstream
                             <div className="p-6 rounded-xl bg-white dark:bg-slate-800/50 border border-border hover:shadow-lg transition-all group">
                                 {/* Course Code Badge */}
                                 <div className="mb-4">
@@ -456,12 +323,6 @@ export default function CoursesPage() {
                         </Button>
                     </div>
                 </div>
-=======
-                            <CourseCard course={course} />
-                        </motion.div>
-                    ))}
-                </div>
->>>>>>> Stashed changes
             )}
         </div>
     );
