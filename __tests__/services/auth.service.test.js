@@ -56,9 +56,11 @@ describe('Auth Service', () => {
 
   describe('verifyEmail', () => {
     it('should call verify-email api', async () => {
+      const userId = 'user-1';
       const token = 'valid-token';
-      await verifyEmail(token);
-      expect(apiClient.post).toHaveBeenCalledWith('/auth/verify-email', { token });
+      const params = new URLSearchParams({ userId, token });
+      await verifyEmail(userId, token);
+      expect(apiClient.post).toHaveBeenCalledWith(`/auth/verify-email?${params.toString()}`, {});
     });
   });
 
