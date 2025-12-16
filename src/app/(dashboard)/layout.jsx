@@ -35,7 +35,23 @@ export default function DashboardLayout({ children }) {
             </div>
 
             {/* Toast notifications */}
-            <Toaster position="top-right" richColors closeButton />
+            <Toaster 
+                position="top-right" 
+                richColors 
+                closeButton 
+                toastOptions={{
+                    style: {
+                        background: 'var(--background)',
+                        border: '2px solid var(--border)',
+                        borderRadius: 'var(--radius)',
+                        boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                        padding: '16px',
+                        fontSize: '14px',
+                        minWidth: '300px',
+                    },
+                    className: 'toast-message',
+                }}
+            />
         </ProtectedRoute>
     );
 }

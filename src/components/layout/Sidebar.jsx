@@ -14,7 +14,12 @@ import {
     Bell,
     FileText,
     X,
-    GraduationCap
+    GraduationCap,
+    Award,
+    ClipboardCheck,
+    MapPin,
+    FileCheck,
+    NotebookPen
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth.store';
@@ -41,12 +46,67 @@ const navItems = [
         icon: Users,
         roles: ['Admin']
     },
+    // Academic Management
     {
-        title: 'Dersler',
+        title: 'Ders Kataloğu',
         href: '/courses',
         icon: BookOpen,
-        roles: ['Student', 'Faculty']
+        roles: ['Student', 'Faculty', 'Admin']
     },
+    {
+        title: 'Kayıtlı Derslerim',
+        href: '/my-courses',
+        icon: GraduationCap,
+        roles: ['Student']
+    },
+    {
+        title: 'Notlarım',
+        href: '/grades',
+        icon: Award,
+        roles: ['Student']
+    },
+    // Attendance - Student
+    {
+        title: 'Yoklama Durumum',
+        href: '/my-attendance',
+        icon: ClipboardCheck,
+        roles: ['Student']
+    },
+    // Attendance - Faculty
+    {
+        title: 'Yoklama Başlat',
+        href: '/attendance/start',
+        icon: MapPin,
+        roles: ['Faculty']
+    },
+    {
+        title: 'Yoklama Raporları',
+        href: '/attendance/reports',
+        icon: ClipboardCheck,
+        roles: ['Faculty']
+    },
+    // Enrollment Requests - Faculty
+    {
+        title: 'Kayıt Talepleri',
+        href: '/enrollment-requests',
+        icon: Users,
+        roles: ['Faculty']
+    },
+    // Grades - Faculty
+    {
+        title: 'Not Girişi',
+        href: '/gradebook',
+        icon: NotebookPen,
+        roles: ['Faculty']
+    },
+    // Excuse Requests
+    {
+        title: 'Mazeret Talepleri',
+        href: '/excuse-requests',
+        icon: FileCheck,
+        roles: ['Faculty', 'Student']
+    },
+    // Others
     {
         title: 'Takvim',
         href: '/calendar',
@@ -64,12 +124,6 @@ const navItems = [
         href: '/notifications',
         icon: Bell,
         roles: ['Student', 'Faculty', 'Admin']
-    },
-    {
-        title: 'Dökümanlar',
-        href: '/documents',
-        icon: FileText,
-        roles: ['Student', 'Faculty']
     },
     {
         title: 'Ayarlar',
@@ -116,30 +170,24 @@ export function Sidebar({ isOpen, onClose }) {
                 )}
             >
                 {/* Header with Logo (Desktop) / Close button (Mobile) */}
-                <div className="h-16 px-4 flex items-center justify-between border-b border-border shrink-0">
-                    {/* Logo - Desktop only */}
-                    <Link href="/dashboard" className="hidden lg:flex items-center gap-2.5">
-                        <div className="p-1.5 rounded-lg bg-gradient-to-br from-violet-500 to-indigo-600 text-white shadow-lg shadow-violet-500/20">
-                            <GraduationCap className="size-5" />
-                        </div>
-                        <span className="text-lg font-bold bg-gradient-to-r from-violet-600 to-indigo-600 dark:from-violet-400 dark:to-indigo-400 bg-clip-text text-transparent">
-                            SmartCampus
-                        </span>
+                <div className="h-16 flex items-center justify-between px-4 border-b border-border">
+                    <Link href="/dashboard" className="flex items-center gap-2">
+                        <GraduationCap className="size-8 text-primary" />
+                        <span className="font-bold text-xl">SmartCampus</span>
                     </Link>
-
-                    {/* Mobile header */}
-                    <span className="lg:hidden text-lg font-semibold">Menü</span>
-                    <button onClick={onClose} className="lg:hidden p-2 hover:bg-accent rounded-md">
+                    <button
+                        onClick={onClose}
+                        className="lg:hidden p-2 rounded-md hover:bg-muted"
+                    >
                         <X className="size-5" />
                     </button>
                 </div>
 
                 {/* Navigation */}
-                <nav className="flex-1 overflow-y-auto p-4">
-
+                <nav className="flex-1 overflow-y-auto py-4 px-2">
                     <ul className="space-y-1">
                         {filteredNavItems.map((item) => {
-                            const isActive = pathname === item.href;
+                            const isActive = pathname === item.href || pathname?.startsWith(item.href + '/');
                             const Icon = item.icon;
 
                             return (
@@ -148,14 +196,21 @@ export function Sidebar({ isOpen, onClose }) {
                                         href={item.href}
                                         onClick={onClose}
                                         className={cn(
-                                            "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-200",
+                                            "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all",
                                             isActive
-                                                ? "bg-primary text-primary-foreground shadow-md shadow-primary/20"
-                                                : "text-muted-foreground hover:bg-accent hover:text-foreground"
+                                                ? "bg-primary/10 text-primary"
+                                                : "text-muted-foreground hover:bg-muted hover:text-foreground"
                                         )}
                                     >
                                         <Icon className="size-5" />
                                         <span>{item.title}</span>
+                                        {isActive && (
+                                            <motion.div
+                                                layoutId="sidebar-indicator"
+                                                className="absolute left-0 w-1 h-8 bg-primary rounded-r-full"
+                                                transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                                            />
+                                        )}
                                     </Link>
                                 </li>
                             );
@@ -165,9 +220,9 @@ export function Sidebar({ isOpen, onClose }) {
 
                 {/* Footer */}
                 <div className="p-4 border-t border-border">
-                    <div className="text-xs text-muted-foreground text-center">
-                        SmartCampus © {new Date().getFullYear()}
-                    </div>
+                    <p className="text-xs text-muted-foreground text-center">
+                        © 2024 SmartCampus
+                    </p>
                 </div>
             </aside>
         </>
