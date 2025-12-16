@@ -24,6 +24,13 @@ export default function GiveAttendancePage() {
     const [result, setResult] = useState(null);
     const [error, setError] = useState(null);
 
+    // Student only - redirect if not student
+    useEffect(() => {
+        if (user && user.role !== 'Student') {
+            router.push('/dashboard');
+        }
+    }, [user, router]);
+
     useEffect(() => {
         loadSession();
     }, [params.sessionId]);

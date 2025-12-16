@@ -108,6 +108,7 @@ export default function StartAttendancePage() {
     const [activeSession, setActiveSession] = useState(null);
     const [gettingLocation, setGettingLocation] = useState(false);
 
+    // Faculty/Admin only - redirect if not authorized
     useEffect(() => {
         loadSessions();
         getCurrentLocation();

@@ -77,13 +77,13 @@ const navItems = [
         title: 'Yoklama Başlat',
         href: '/attendance/start',
         icon: MapPin,
-        roles: ['Faculty']
+        roles: ['Faculty', 'Admin']
     },
     {
         title: 'Yoklama Raporları',
         href: '/attendance/reports',
         icon: ClipboardCheck,
-        roles: ['Faculty']
+        roles: ['Faculty', 'Admin']
     },
     // Enrollment Requests - Faculty
     {
@@ -97,7 +97,7 @@ const navItems = [
         title: 'Not Girişi',
         href: '/gradebook',
         icon: NotebookPen,
-        roles: ['Faculty']
+        roles: ['Faculty', 'Admin']
     },
     // Excuse Requests
     {
