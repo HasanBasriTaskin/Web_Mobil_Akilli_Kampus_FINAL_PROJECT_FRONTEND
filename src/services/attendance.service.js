@@ -1,82 +1,87 @@
 /**
- * Attendance Service
- * SOLID: Single Responsibility - Sadece yoklama işlemlerini yönetir
+ * Attendance Service - Yoklama işlemleri için API servisi
  */
 
 import { get, post, put, postFormData } from './api-client';
 
+// ==================== SESSION MANAGEMENT (Faculty) ====================
+
 /**
- * Yoklama oturumu açma (Faculty)
- * @param {object} sessionData - { sectionId, date, startTime, endTime, geofenceRadius }
- * @returns {Promise<object>} Oturum bilgileri
+ * Yeni yoklama oturumu oluştur
+ * @param {object} sessionData - { sectionId, date, startTime, endTime, latitude, longitude, geofenceRadius }
  */
-export async function createAttendanceSession(sessionData) {
+export async function createSession(sessionData) {
     return post('/attendance/sessions', sessionData);
 }
 
 /**
- * Oturum detayları
- * @param {number|string} sessionId - Session ID
- * @returns {Promise<object>} Oturum detayları
+ * Oturum detaylarını getir
+ * @param {number} sessionId 
  */
-export async function getAttendanceSession(sessionId) {
+export async function getSessionById(sessionId) {
     return get(`/attendance/sessions/${sessionId}`);
 }
 
 /**
- * Oturumu kapatma (Faculty)
- * @param {number|string} sessionId - Session ID
- * @returns {Promise<object>}
+ * Oturumu kapat
+ * @param {number} sessionId 
  */
-export async function closeAttendanceSession(sessionId) {
-    return put(`/attendance/sessions/${sessionId}/close`, {});
+export async function closeSession(sessionId) {
+    return put(`/attendance/sessions/${sessionId}/close`);
 }
 
 /**
- * Benim oturumlarım (Faculty)
- * @returns {Promise<object>} Oturum listesi
+ * Instructor'ın oturumlarını getir
  */
 export async function getMySessions() {
     return get('/attendance/sessions/my-sessions');
 }
 
 /**
- * Yoklama verme (Student)
- * @param {number|string} sessionId - Session ID
+ * Oturum kayıtlarını getir
+ * @param {number} sessionId 
+ */
+export async function getSessionRecords(sessionId) {
+    return get(`/attendance/sessions/${sessionId}/records`);
+}
+
+// ==================== STUDENT CHECK-IN ====================
+
+/**
+ * Yoklamaya katıl (GPS ile)
+ * @param {number} sessionId 
  * @param {object} locationData - { latitude, longitude, accuracy }
- * @returns {Promise<object>}
  */
 export async function checkIn(sessionId, locationData) {
     return post(`/attendance/sessions/${sessionId}/checkin`, locationData);
 }
 
 /**
- * Yoklama durumum (Student)
- * @returns {Promise<object>} Yoklama istatistikleri
+ * Öğrencinin yoklama istatistiklerini getir
  */
 export async function getMyAttendance() {
     return get('/attendance/my-attendance');
 }
 
+// ==================== EXCUSE REQUESTS ====================
+
 /**
- * Yoklama raporu (Faculty)
- * @param {number|string} sectionId - Section ID
- * @returns {Promise<object>} Rapor verisi
+ * Mazeret talebi oluştur
+ * @param {object} requestData - { sessionId, reason }
  */
-export async function getAttendanceReport(sectionId) {
-    return get(`/attendance/report/${sectionId}`);
+export async function createExcuseRequest(requestData) {
+    return post('/attendance/excuse-requests', requestData);
 }
 
 /**
- * Mazeret bildirme (Student)
+ * Mazeret dosyası ile birlikte talep oluştur
  * @param {object} excuseData - { sessionId, reason, document (File) }
- * @returns {Promise<object>}
  */
-export async function submitExcuseRequest(excuseData) {
+export async function submitExcuseWithFile(excuseData) {
     const formData = new FormData();
     formData.append('sessionId', excuseData.sessionId);
     formData.append('reason', excuseData.reason);
-    
+
     if (excuseData.document) {
         formData.append('document', excuseData.document);
     }
@@ -85,44 +90,65 @@ export async function submitExcuseRequest(excuseData) {
 }
 
 /**
- * Mazeret listesi (Faculty)
- * @returns {Promise<object>} Mazeret talepleri listesi
+ * Mazeret taleplerini getir (Faculty)
+ * @param {number} sectionId - Opsiyonel filtre
  */
-export async function getExcuseRequests() {
-    return get('/attendance/excuse-requests');
+export async function getExcuseRequests(sectionId = null) {
+    const query = sectionId ? `?sectionId=${sectionId}` : '';
+    return get(`/attendance/excuse-requests${query}`);
 }
 
 /**
- * Mazeret onaylama (Faculty)
- * @param {number|string} requestId - Request ID
- * @param {object} data - { notes }
- * @returns {Promise<object>}
+ * Mazeret talebini onayla
+ * @param {number} requestId 
+ * @param {object} reviewData - { notes }
  */
-export async function approveExcuseRequest(requestId, data = {}) {
-    return put(`/attendance/excuse-requests/${requestId}/approve`, data);
+export async function approveExcuseRequest(requestId, reviewData = {}) {
+    return put(`/attendance/excuse-requests/${requestId}/approve`, reviewData);
 }
 
 /**
- * Mazeret reddetme (Faculty)
- * @param {number|string} requestId - Request ID
- * @param {object} data - { notes }
- * @returns {Promise<object>}
+ * Mazeret talebini reddet
+ * @param {number} requestId 
+ * @param {object} reviewData - { notes }
  */
-export async function rejectExcuseRequest(requestId, data = {}) {
-    return put(`/attendance/excuse-requests/${requestId}/reject`, data);
+export async function rejectExcuseRequest(requestId, reviewData = {}) {
+    return put(`/attendance/excuse-requests/${requestId}/reject`, reviewData);
+}
+
+// ==================== GPS UTILITIES ====================
+
+/**
+ * İki koordinat arasındaki mesafeyi hesapla (Haversine - metre)
+ */
+export function calculateDistance(lat1, lon1, lat2, lon2) {
+    const R = 6371000; // Dünya yarıçapı (m)
+    const dLat = toRad(lat2 - lat1);
+    const dLon = toRad(lon2 - lon1);
+    const a =
+        Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+        Math.cos(toRad(lat1)) * Math.cos(toRad(lat2)) *
+        Math.sin(dLon / 2) * Math.sin(dLon / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+    return R * c;
+}
+
+function toRad(deg) {
+    return deg * (Math.PI / 180);
 }
 
 export default {
-    createAttendanceSession,
-    getAttendanceSession,
-    closeAttendanceSession,
+    createSession,
+    getSessionById,
+    closeSession,
     getMySessions,
+    getSessionRecords,
     checkIn,
     getMyAttendance,
-    getAttendanceReport,
-    submitExcuseRequest,
+    createExcuseRequest,
+    submitExcuseWithFile,
     getExcuseRequests,
     approveExcuseRequest,
     rejectExcuseRequest,
+    calculateDistance
 };
-
