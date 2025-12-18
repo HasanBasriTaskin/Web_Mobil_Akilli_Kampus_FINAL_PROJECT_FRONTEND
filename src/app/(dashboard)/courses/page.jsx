@@ -55,20 +55,20 @@ export default function CoursesPage() {
             if (departmentFilter) params.departmentId = departmentFilter;
 
             const response = await getCourses(params);
-            
+
             if (response.success) {
                 setCourses(response.data?.items || response.data || []);
             } else {
                 // Mock data fallback
                 let filteredCourses = [...mockCourses];
                 if (searchTerm) {
-                    filteredCourses = filteredCourses.filter(c => 
+                    filteredCourses = filteredCourses.filter(c =>
                         c.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
                         c.name.toLowerCase().includes(searchTerm.toLowerCase())
                     );
                 }
                 if (departmentFilter) {
-                    filteredCourses = filteredCourses.filter(c => 
+                    filteredCourses = filteredCourses.filter(c =>
                         c.department.id === parseInt(departmentFilter)
                     );
                 }
@@ -79,13 +79,13 @@ export default function CoursesPage() {
             console.error('Dersler yüklenemedi, mock data kullanılıyor:', error);
             let filteredCourses = [...mockCourses];
             if (searchTerm) {
-                filteredCourses = filteredCourses.filter(c => 
+                filteredCourses = filteredCourses.filter(c =>
                     c.code.toLowerCase().includes(searchTerm.toLowerCase()) ||
                     c.name.toLowerCase().includes(searchTerm.toLowerCase())
                 );
             }
             if (departmentFilter) {
-                filteredCourses = filteredCourses.filter(c => 
+                filteredCourses = filteredCourses.filter(c =>
                     c.department.id === parseInt(departmentFilter)
                 );
             }
