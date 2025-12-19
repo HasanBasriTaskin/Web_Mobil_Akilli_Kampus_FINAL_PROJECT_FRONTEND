@@ -19,7 +19,8 @@ import {
     ClipboardCheck,
     MapPin,
     FileCheck,
-    NotebookPen
+    NotebookPen,
+    UtensilsCrossed
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth.store';
@@ -105,6 +106,13 @@ const navItems = [
         href: '/excuse-requests',
         icon: FileCheck,
         roles: ['Faculty', 'Student']
+    },
+    // Meal Service
+    {
+        title: 'Yemek Menüsü',
+        href: '/meals/menu',
+        icon: UtensilsCrossed,
+        roles: ['Student', 'Faculty', 'Admin']
     },
     // Others
     {
