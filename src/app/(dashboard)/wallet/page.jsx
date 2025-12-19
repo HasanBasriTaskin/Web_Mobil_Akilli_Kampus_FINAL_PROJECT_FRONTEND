@@ -15,7 +15,11 @@ import {
     ChevronRight,
     CheckCircle,
     Clock,
-    XCircle
+    XCircle,
+    UtensilsCrossed,
+    Printer,
+    ShoppingBag,
+    AlertCircle
 } from 'lucide-react';
 import { getBalance, addMoney, getTransactions } from '@/services/wallet.service';
 import { toast } from 'sonner';
@@ -28,7 +32,7 @@ import { Input } from '@/components/ui/input';
 function StatusBadge({ status }) {
     const statusConfig = {
         completed: {
-            label: 'Tamamlandı',
+            label: 'Başarılı',
             className: 'bg-green-500/10 text-green-600 dark:text-green-400 border-green-500/20',
             icon: CheckCircle
         },
@@ -53,6 +57,19 @@ function StatusBadge({ status }) {
             {config.label}
         </span>
     );
+}
+
+/**
+ * Get category icon and color
+ */
+function getCategoryIcon(category) {
+    const categoryConfig = {
+        'Yemek': { icon: UtensilsCrossed, color: 'bg-orange-300' },
+        'Kırtasiye': { icon: Printer, color: 'bg-blue-300' },
+        'Yükleme': { icon: ArrowDown, color: 'bg-green-300' },
+        'Alışveriş': { icon: ShoppingBag, color: 'bg-purple-300' }
+    };
+    return categoryConfig[category] || { icon: Wallet, color: 'bg-gray-300' };
 }
 
 /**
@@ -172,22 +189,27 @@ function AddMoneyModal({ isOpen, onClose, onSuccess }) {
                             <div className="grid grid-cols-2 gap-2">
                                 {paymentMethods.map((method) => {
                                     const Icon = method.icon;
+                                    const isSelected = paymentMethod === method.value;
                                     return (
                                         <button
                                             key={method.value}
                                             type="button"
                                             onClick={() => setPaymentMethod(method.value)}
                                             className={`p-3 rounded-lg border-2 transition-all ${
-                                                paymentMethod === method.value
-                                                    ? 'border-primary bg-primary/10'
-                                                    : 'border-border hover:border-primary/50'
+                                                isSelected
+                                                    ? 'border-purple-500 bg-purple-50 dark:bg-purple-950/20 shadow-md'
+                                                    : 'border-border hover:border-purple-400 hover:bg-purple-50/50 dark:hover:bg-purple-950/10 hover:shadow-md'
                                             }`}
                                         >
-                                            <Icon className={`size-5 mx-auto mb-1 ${
-                                                paymentMethod === method.value ? 'text-primary' : 'text-muted-foreground'
+                                            <Icon className={`size-5 mx-auto mb-1 transition-colors ${
+                                                isSelected 
+                                                    ? 'text-purple-600 dark:text-purple-400' 
+                                                    : 'text-muted-foreground hover:text-purple-600 dark:hover:text-purple-400'
                                             }`} />
-                                            <p className={`text-xs font-medium ${
-                                                paymentMethod === method.value ? 'text-primary' : 'text-muted-foreground'
+                                            <p className={`text-xs font-medium transition-colors ${
+                                                isSelected 
+                                                    ? 'text-purple-600 dark:text-purple-400' 
+                                                    : 'text-muted-foreground hover:text-purple-600 dark:hover:text-purple-400'
                                             }`}>
                                                 {method.label}
                                             </p>
@@ -209,7 +231,7 @@ function AddMoneyModal({ isOpen, onClose, onSuccess }) {
                             <Button
                                 type="submit"
                                 disabled={loading}
-                                className="flex-1"
+                                className="flex-1 bg-purple-600 hover:bg-purple-700 text-white"
                             >
                                 {loading ? 'Yükleniyor...' : 'Yükle'}
                             </Button>
@@ -294,20 +316,19 @@ export default function WalletPage() {
     }
 
     function formatDate(dateString) {
-        return new Date(dateString).toLocaleDateString('tr-TR', {
-            year: 'numeric',
-            month: 'long',
-            day: 'numeric',
-            hour: '2-digit',
-            minute: '2-digit'
-        });
+        const date = new Date(dateString);
+        const day = date.getDate();
+        const month = date.toLocaleDateString('tr-TR', { month: 'long' });
+        const year = date.getFullYear();
+        const hours = date.getHours().toString().padStart(2, '0');
+        const minutes = date.getMinutes().toString().padStart(2, '0');
+        return `${day} ${month} ${year}, ${hours}:${minutes}`;
     }
 
-    function getTransactionIcon(type) {
-        return type === 'deposit' ? ArrowDown : ArrowUp;
-    }
-
-    function getTransactionColor(type) {
+    function getTransactionColor(type, status) {
+        if (status === 'failed') {
+            return 'text-gray-500';
+        }
         return type === 'deposit' 
             ? 'text-green-600 dark:text-green-400' 
             : 'text-red-600 dark:text-red-400';
@@ -329,12 +350,49 @@ export default function WalletPage() {
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.1 }}
-                className="relative overflow-hidden rounded-xl bg-gradient-to-br from-violet-500 via-indigo-500 to-purple-600 p-6 lg:p-8 text-white"
+                className="relative overflow-hidden rounded-xl p-6 lg:p-8 text-white"
             >
+                {/* Animated Gradient Background */}
+                <motion.div
+                    className="absolute inset-0"
+                    animate={{
+                        background: [
+                            'linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #a855f7 100%)',
+                            'linear-gradient(135deg, #7c3aed 0%, #5b21b6 50%, #9333ea 100%)',
+                            'linear-gradient(135deg, #a78bfa 0%, #818cf8 50%, #c084fc 100%)',
+                            'linear-gradient(135deg, #8b5cf6 0%, #6366f1 50%, #a855f7 100%)',
+                        ],
+                    }}
+                    transition={{
+                        duration: 8,
+                        repeat: Infinity,
+                        ease: "easeInOut"
+                    }}
+                />
+                
+                {/* Subtle Gradient Layer for Depth */}
+                <motion.div
+                    className="absolute inset-0 opacity-30"
+                    animate={{
+                        background: [
+                            'radial-gradient(circle at 20% 50%, rgba(139, 92, 246, 0.4) 0%, transparent 50%)',
+                            'radial-gradient(circle at 80% 50%, rgba(99, 102, 241, 0.4) 0%, transparent 50%)',
+                            'radial-gradient(circle at 50% 20%, rgba(168, 85, 247, 0.4) 0%, transparent 50%)',
+                            'radial-gradient(circle at 20% 50%, rgba(139, 92, 246, 0.4) 0%, transparent 50%)',
+                        ],
+                    }}
+                    transition={{
+                        duration: 10,
+                        repeat: Infinity,
+                        ease: "easeInOut",
+                        delay: 1
+                    }}
+                />
+
                 <div className="relative z-10">
                     <div className="flex items-center justify-between mb-4">
                         <div className="flex items-center gap-3">
-                            <div className="p-3 rounded-lg bg-white/20">
+                            <div className="p-3 rounded-lg bg-white/20 backdrop-blur-sm">
                                 <Wallet className="size-6" />
                             </div>
                             <div>
@@ -357,9 +415,6 @@ export default function WalletPage() {
                         Para Yükle
                     </Button>
                 </div>
-                {/* Decorative circles */}
-                <div className="absolute -top-10 -right-10 w-40 h-40 rounded-full bg-white/10" />
-                <div className="absolute -bottom-10 -right-20 w-60 h-60 rounded-full bg-white/5" />
             </motion.div>
 
             {/* Transactions History */}
@@ -389,42 +444,41 @@ export default function WalletPage() {
                             <table className="w-full">
                                 <thead className="bg-muted/50">
                                     <tr>
-                                        <th className="text-left p-4 text-sm font-medium text-muted-foreground">Tarih</th>
-                                        <th className="text-left p-4 text-sm font-medium text-muted-foreground">Açıklama</th>
-                                        <th className="text-left p-4 text-sm font-medium text-muted-foreground">Ödeme Yöntemi</th>
-                                        <th className="text-right p-4 text-sm font-medium text-muted-foreground">Tutar</th>
-                                        <th className="text-right p-4 text-sm font-medium text-muted-foreground">Bakiye</th>
-                                        <th className="text-center p-4 text-sm font-medium text-muted-foreground">Durum</th>
+                                        <th className="text-left p-4 text-sm font-medium text-muted-foreground">İŞLEM TARİHİ</th>
+                                        <th className="text-left p-4 text-sm font-medium text-muted-foreground">AÇIKLAMA</th>
+                                        <th className="text-left p-4 text-sm font-medium text-muted-foreground">KATEGORİ</th>
+                                        <th className="text-right p-4 text-sm font-medium text-muted-foreground">TUTAR</th>
+                                        <th className="text-center p-4 text-sm font-medium text-muted-foreground">DURUM</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     {transactions.map((transaction) => {
-                                        const Icon = getTransactionIcon(transaction.type);
-                                        const color = getTransactionColor(transaction.type);
+                                        const categoryInfo = getCategoryIcon(transaction.category);
+                                        const CategoryIcon = categoryInfo.icon;
+                                        const iconBg = categoryInfo.color;
+                                        const color = getTransactionColor(transaction.type, transaction.status);
                                         return (
                                             <tr key={transaction.id} className="border-t border-border hover:bg-muted/30 transition-colors">
                                                 <td className="p-4 text-sm">
                                                     {formatDate(transaction.createdAt)}
                                                 </td>
                                                 <td className="p-4">
-                                                    <div className="flex items-center gap-2">
-                                                        <Icon className={`size-4 ${color}`} />
+                                                    <div className="flex items-center gap-3">
+                                                        <div className={`${iconBg} p-2 rounded-full`}>
+                                                            <CategoryIcon className="size-4 text-white" />
+                                                        </div>
                                                         <span className="text-sm font-medium">{transaction.description}</span>
                                                     </div>
                                                 </td>
                                                 <td className="p-4 text-sm text-muted-foreground">
-                                                    {transaction.paymentMethod === 'credit_card' ? 'Kredi Kartı' :
-                                                     transaction.paymentMethod === 'debit_card' ? 'Banka Kartı' :
-                                                     transaction.paymentMethod === 'bank_transfer' ? 'Banka Havalesi' :
-                                                     transaction.paymentMethod === 'mobile_payment' ? 'Mobil Ödeme' :
-                                                     transaction.paymentMethod === 'wallet' ? 'Cüzdan' :
-                                                     transaction.paymentMethod}
+                                                    {transaction.category || '-'}
                                                 </td>
                                                 <td className={`p-4 text-sm font-medium text-right ${color}`}>
-                                                    {transaction.amount > 0 ? '+' : ''}{formatCurrency(transaction.amount)}
-                                                </td>
-                                                <td className="p-4 text-sm text-muted-foreground text-right">
-                                                    {formatCurrency(transaction.balanceAfter)}
+                                                    {transaction.status === 'failed' 
+                                                        ? formatCurrency(0)
+                                                        : transaction.amount > 0 
+                                                            ? `+${formatCurrency(transaction.amount)}` 
+                                                            : formatCurrency(transaction.amount)}
                                                 </td>
                                                 <td className="p-4 text-center">
                                                     <StatusBadge status={transaction.status} />
@@ -440,7 +494,7 @@ export default function WalletPage() {
                         {pagination.totalPages > 1 && (
                             <div className="p-4 border-t border-border flex items-center justify-between">
                                 <p className="text-sm text-muted-foreground">
-                                    Toplam {pagination.totalCount} işlem, Sayfa {currentPage} / {pagination.totalPages}
+                                    Toplam {pagination.totalCount} işlemden {((currentPage - 1) * pageSize) + 1} ile {Math.min(currentPage * pageSize, pagination.totalCount)} arası gösteriliyor
                                 </p>
                                 <div className="flex items-center gap-2">
                                     <Button
