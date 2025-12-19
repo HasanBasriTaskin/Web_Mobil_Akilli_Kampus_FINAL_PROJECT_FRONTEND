@@ -8,13 +8,27 @@ import { successResponse, errorResponse } from '@/mocks/helpers/response';
  */
 export async function GET(request, { params }) {
     try {
-        const { id } = params;
+        // URL'den ID'yi al
+        const url = new URL(request.url);
+        const pathParts = url.pathname.split('/');
+        const id = pathParts[pathParts.length - 1];
         
-        if (!id) {
+        // Alternatif: params'dan al (Next.js versiyonuna göre)
+        let eventId = id;
+        if (params) {
+            if (typeof params === 'object' && 'then' in params) {
+                const resolvedParams = await params;
+                eventId = resolvedParams?.id || id;
+            } else {
+                eventId = params.id || id;
+            }
+        }
+        
+        if (!eventId) {
             return errorResponse('Etkinlik ID gerekli', 400);
         }
         
-        const event = getMockEventById(id);
+        const event = getMockEventById(eventId);
         
         if (!event) {
             return errorResponse('Etkinlik bulunamadı', 404);
@@ -22,7 +36,8 @@ export async function GET(request, { params }) {
         
         return successResponse(event);
     } catch (error) {
-        return errorResponse(error.message, 500);
+        console.error('Event detail error:', error);
+        return errorResponse(error.message || 'Sunucu hatası', 500);
     }
 }
 

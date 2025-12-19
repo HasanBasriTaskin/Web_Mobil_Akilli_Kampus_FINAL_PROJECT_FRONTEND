@@ -40,8 +40,41 @@ export async function getEventById(eventId) {
     return data;
 }
 
+/**
+ * Etkinliğe kayıt ol
+ * @param {string} eventId - Etkinlik ID
+ * @param {object} formData - Kayıt form verileri
+ */
+export async function registerToEvent(eventId, formData = {}) {
+    const response = await fetch(`/api/v1/events/${eventId}/register`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData)
+    });
+    
+    if (!response.ok) {
+        const errorText = await response.text();
+        let errorMessage = 'Kayıt işlemi başarısız oldu';
+        
+        try {
+            const errorJson = JSON.parse(errorText);
+            errorMessage = errorJson.message || errorMessage;
+        } catch {
+            errorMessage = errorText || errorMessage;
+        }
+        
+        throw new Error(errorMessage);
+    }
+    
+    const result = await response.json();
+    return result;
+}
+
 export default {
     getEvents,
-    getEventById
+    getEventById,
+    registerToEvent
 };
 
