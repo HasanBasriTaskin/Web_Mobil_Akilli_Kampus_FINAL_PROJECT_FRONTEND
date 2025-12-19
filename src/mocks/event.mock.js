@@ -221,8 +221,165 @@ export function getMockEventById(eventId) {
     return mockEventsStore.find(e => e.id === eventId);
 }
 
+// In-memory registrations store
+let mockRegistrationsStore = [];
+
+/**
+ * Kullanıcının kayıt olduğu etkinlikleri getir (mock)
+ * @param {number} userId - Kullanıcı ID
+ */
+export function getMockMyEvents(userId = 1) {
+    initializeMockEvents();
+    
+    // Kullanıcının kayıtlarını bul
+    const registrations = mockRegistrationsStore.filter(r => r.userId === userId);
+    
+    // Her kayıt için etkinlik bilgilerini ekle
+    const myEvents = registrations.map(reg => {
+        const event = getMockEventById(reg.eventId);
+        return {
+            ...reg,
+            event: event
+        };
+    });
+    
+    // Tarihe göre sırala (gelecek etkinlikler önce)
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    
+    myEvents.sort((a, b) => {
+        if (!a.event || !b.event) return 0;
+        const dateA = new Date(a.event.date);
+        const dateB = new Date(b.event.date);
+        dateA.setHours(0, 0, 0, 0);
+        dateB.setHours(0, 0, 0, 0);
+        
+        // Gelecek etkinlikler önce
+        const aIsFuture = dateA >= today;
+        const bIsFuture = dateB >= today;
+        
+        if (aIsFuture && !bIsFuture) return -1;
+        if (!aIsFuture && bIsFuture) return 1;
+        
+        // Aynı kategorideyse tarihe göre sırala
+        return dateA - dateB;
+    });
+    
+    return myEvents;
+}
+
+/**
+ * Kayıt iptal et (mock)
+ * @param {string} registrationId - Kayıt ID
+ */
+export function cancelMockRegistration(registrationId) {
+    const registration = mockRegistrationsStore.find(r => r.id === registrationId);
+    
+    if (!registration) {
+        throw new Error('Kayıt bulunamadı');
+    }
+    
+    // Etkinlik kayıt sayısını azalt
+    const event = getMockEventById(registration.eventId);
+    if (event) {
+        event.registeredCount = Math.max(0, event.registeredCount - 1);
+    }
+    
+    // Kaydı sil
+    mockRegistrationsStore = mockRegistrationsStore.filter(r => r.id !== registrationId);
+    
+    return registration;
+}
+
+/**
+ * QR kod ile kayıt doğrula (mock)
+ * @param {string} qrCode - QR kod
+ */
+export function validateEventRegistration(qrCode) {
+    const registration = mockRegistrationsStore.find(r => r.qrCode === qrCode);
+    
+    if (!registration) {
+        throw new Error('Geçersiz QR kod');
+    }
+    
+    const event = getMockEventById(registration.eventId);
+    
+    if (!event) {
+        throw new Error('Etkinlik bulunamadı');
+    }
+    
+    // Etkinlik tarihini kontrol et
+    const eventDate = new Date(event.date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    eventDate.setHours(0, 0, 0, 0);
+    
+    if (eventDate.getTime() !== today.getTime()) {
+        throw new Error('Bu QR kod bugün için geçerli değil');
+    }
+    
+    return {
+        registration,
+        event,
+        user: {
+            id: registration.userId,
+            fullName: 'Ahmet Yılmaz',
+            studentNumber: '2021001234',
+            email: 'ahmet.yilmaz@university.edu.tr'
+        }
+    };
+}
+
+/**
+ * Check-in yap (mock)
+ * @param {string} qrCode - QR kod
+ */
+export function checkInEvent(qrCode) {
+    const registration = mockRegistrationsStore.find(r => r.qrCode === qrCode);
+    
+    if (!registration) {
+        throw new Error('Kayıt bulunamadı');
+    }
+    
+    if (registration.checkedIn) {
+        throw new Error('Bu kayıt zaten check-in yapılmış');
+    }
+    
+    registration.checkedIn = true;
+    registration.checkedInAt = new Date().toISOString();
+    
+    return registration;
+}
+
+/**
+ * Etkinlik katılımcı sayısını getir (mock)
+ * @param {string} eventId - Etkinlik ID
+ */
+export function getEventAttendeeCount(eventId) {
+    const checkedInCount = mockRegistrationsStore.filter(
+        r => r.eventId === eventId && r.checkedIn
+    ).length;
+    
+    const totalCount = mockRegistrationsStore.filter(
+        r => r.eventId === eventId
+    ).length;
+    
+    return {
+        checkedIn: checkedInCount,
+        total: totalCount
+    };
+}
+
+// Registration store'u export et (register route'unda kullanılacak)
+export { mockRegistrationsStore };
+
 export default {
     getMockEvents,
-    getMockEventById
+    getMockEventById,
+    getMockMyEvents,
+    cancelMockRegistration,
+    validateEventRegistration,
+    checkInEvent,
+    getEventAttendeeCount
 };
 

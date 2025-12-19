@@ -143,6 +143,18 @@ const navItems = [
         icon: PartyPopper,
         roles: ['Student', 'Faculty', 'Admin']
     },
+    {
+        title: 'Etkinliklerim',
+        href: '/my-events',
+        icon: Calendar,
+        roles: ['Student', 'Faculty', 'Admin']
+    },
+    {
+        title: 'Etkinlik Check-in',
+        href: '/events/checkin',
+        icon: QrCode,
+        roles: ['Faculty', 'Admin']
+    },
     // Others
     {
         title: 'Takvim',

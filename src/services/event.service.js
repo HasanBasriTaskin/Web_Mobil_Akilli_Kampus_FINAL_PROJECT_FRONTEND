@@ -72,9 +72,134 @@ export async function registerToEvent(eventId, formData = {}) {
     return result;
 }
 
+/**
+ * Kullanıcının kayıt olduğu etkinlikleri getir
+ */
+export async function getMyEvents() {
+    const response = await fetch('/api/v1/events/my-events');
+    
+    if (!response.ok) {
+        throw new Error('Kayıtlı etkinlikler yüklenemedi');
+    }
+    
+    const data = await response.json();
+    return data;
+}
+
+/**
+ * Etkinlik kaydını iptal et
+ * @param {string} registrationId - Kayıt ID
+ */
+export async function cancelEventRegistration(registrationId) {
+    const response = await fetch(`/api/v1/events/registrations/${registrationId}/cancel`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        }
+    });
+    
+    if (!response.ok) {
+        const errorText = await response.text();
+        let errorMessage = 'Kayıt iptal edilemedi';
+        
+        try {
+            const errorJson = JSON.parse(errorText);
+            errorMessage = errorJson.message || errorMessage;
+        } catch {
+            errorMessage = errorText || errorMessage;
+        }
+        
+        throw new Error(errorMessage);
+    }
+    
+    const result = await response.json();
+    return result;
+}
+
+/**
+ * QR kod ile kayıt doğrula (Check-in için)
+ * @param {string} qrCode - QR kod
+ */
+export async function validateEventQRCode(qrCode) {
+    const response = await fetch('/api/v1/events/checkin/validate', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ qrCode })
+    });
+    
+    if (!response.ok) {
+        const errorText = await response.text();
+        let errorMessage = 'QR kod doğrulanamadı';
+        
+        try {
+            const errorJson = JSON.parse(errorText);
+            errorMessage = errorJson.message || errorMessage;
+        } catch {
+            errorMessage = errorText || errorMessage;
+        }
+        
+        throw new Error(errorMessage);
+    }
+    
+    const result = await response.json();
+    return result;
+}
+
+/**
+ * Check-in yap
+ * @param {string} qrCode - QR kod
+ */
+export async function checkInEvent(qrCode) {
+    const response = await fetch('/api/v1/events/checkin', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ qrCode })
+    });
+    
+    if (!response.ok) {
+        const errorText = await response.text();
+        let errorMessage = 'Check-in başarısız oldu';
+        
+        try {
+            const errorJson = JSON.parse(errorText);
+            errorMessage = errorJson.message || errorMessage;
+        } catch {
+            errorMessage = errorText || errorMessage;
+        }
+        
+        throw new Error(errorMessage);
+    }
+    
+    const result = await response.json();
+    return result;
+}
+
+/**
+ * Etkinlik katılımcı sayısını getir
+ * @param {string} eventId - Etkinlik ID
+ */
+export async function getEventAttendeeCount(eventId) {
+    const response = await fetch(`/api/v1/events/${eventId}/attendees`);
+    
+    if (!response.ok) {
+        throw new Error('Katılımcı sayısı yüklenemedi');
+    }
+    
+    const data = await response.json();
+    return data;
+}
+
 export default {
     getEvents,
     getEventById,
-    registerToEvent
+    registerToEvent,
+    getMyEvents,
+    cancelEventRegistration,
+    validateEventQRCode,
+    checkInEvent,
+    getEventAttendeeCount
 };
-
