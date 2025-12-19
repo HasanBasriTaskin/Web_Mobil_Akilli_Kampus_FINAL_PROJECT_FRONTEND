@@ -22,7 +22,8 @@ import {
     NotebookPen,
     UtensilsCrossed,
     Wallet,
-    QrCode
+    QrCode,
+    PartyPopper
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth.store';
@@ -133,6 +134,13 @@ const navItems = [
         title: 'Cüzdan',
         href: '/wallet',
         icon: Wallet,
+        roles: ['Student', 'Faculty', 'Admin']
+    },
+    // Event Management
+    {
+        title: 'Etkinlikler',
+        href: '/events',
+        icon: PartyPopper,
         roles: ['Student', 'Faculty', 'Admin']
     },
     // Others
