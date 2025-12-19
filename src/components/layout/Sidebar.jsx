@@ -20,7 +20,8 @@ import {
     MapPin,
     FileCheck,
     NotebookPen,
-    UtensilsCrossed
+    UtensilsCrossed,
+    Wallet
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth.store';
@@ -118,6 +119,13 @@ const navItems = [
         title: 'Rezervasyonlarım',
         href: '/meals/reservations',
         icon: Calendar,
+        roles: ['Student', 'Faculty', 'Admin']
+    },
+    // Wallet
+    {
+        title: 'Cüzdan',
+        href: '/wallet',
+        icon: Wallet,
         roles: ['Student', 'Faculty', 'Admin']
     },
     // Others
