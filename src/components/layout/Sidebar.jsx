@@ -21,7 +21,8 @@ import {
     FileCheck,
     NotebookPen,
     UtensilsCrossed,
-    Wallet
+    Wallet,
+    QrCode
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth.store';
@@ -120,6 +121,12 @@ const navItems = [
         href: '/meals/reservations',
         icon: Calendar,
         roles: ['Student', 'Faculty', 'Admin']
+    },
+    {
+        title: 'QR Kod Tarayıcı',
+        href: '/meals/scan',
+        icon: QrCode,
+        roles: ['Faculty', 'Admin']
     },
     // Wallet
     {

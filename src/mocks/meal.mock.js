@@ -297,10 +297,145 @@ export function cancelMockReservation(reservationId) {
     return reservation;
 }
 
+// Mock kullanıcı bilgileri (userId -> user mapping)
+const mockUsers = {
+    1: {
+        id: 1,
+        fullName: 'Ahmet Yılmaz',
+        studentNumber: '2021001234',
+        email: 'ahmet.yilmaz@university.edu.tr',
+        department: 'Bilgisayar Mühendisliği'
+    },
+    2: {
+        id: 2,
+        fullName: 'Ayşe Demir',
+        studentNumber: '2022005678',
+        email: 'ayse.demir@university.edu.tr',
+        department: 'Elektrik Mühendisliği'
+    },
+    3: {
+        id: 3,
+        fullName: 'Mehmet Kaya',
+        studentNumber: '2023009012',
+        email: 'mehmet.kaya@university.edu.tr',
+        department: 'Makine Mühendisliği'
+    }
+};
+
+/**
+ * QR kod veya Student ID ile doğrula ve rezervasyon bilgilerini getir (mock)
+ * @param {string} qrCodeOrStudentId - QR kod veya Student ID
+ */
+export function validateMockQRCode(qrCodeOrStudentId) {
+    // In-memory store'u başlat
+    initializeMockReservations();
+    
+    if (!qrCodeOrStudentId || qrCodeOrStudentId.trim() === '') {
+        throw new Error('QR kod veya öğrenci numarası gerekli');
+    }
+    
+    const input = qrCodeOrStudentId.trim();
+    
+    // Önce QR kod ile dene, sonra Student ID ile
+    let reservation = mockReservationsStore.find(r => r.qrCode === input);
+    
+    // Eğer QR kod ile bulunamadıysa, Student ID ile dene
+    if (!reservation) {
+        // Student ID formatını kontrol et (örn: 2024-8492, 2021001234)
+        const studentIdPattern = /^\d{4}[-]?\d{4}$|^\d{10}$/;
+        if (studentIdPattern.test(input)) {
+            // Student ID'ye göre kullanıcıyı bul
+            const user = Object.values(mockUsers).find(u => 
+                u.studentNumber === input || 
+                u.studentNumber.replace('-', '') === input.replace('-', '')
+            );
+            
+            if (user) {
+                // Bu kullanıcının bugünkü rezervasyonunu bul
+                const today = new Date();
+                today.setHours(0, 0, 0, 0);
+                
+                reservation = mockReservationsStore.find(r => {
+                    if (r.userId !== user.id) return false;
+                    if (r.status !== 'reserved') return false;
+                    
+                    const reservationDate = new Date(r.date);
+                    reservationDate.setHours(0, 0, 0, 0);
+                    return reservationDate.getTime() === today.getTime();
+                });
+            }
+        }
+    }
+    
+    if (!reservation) {
+        throw new Error('Geçersiz QR kod veya öğrenci numarası');
+    }
+    
+    // Rezervasyon durumunu kontrol et
+    if (reservation.status !== 'reserved') {
+        throw new Error('Bu rezervasyon kullanılamaz');
+    }
+    
+    // Rezervasyon tarihini kontrol et
+    const reservationDate = new Date(reservation.date);
+    const today = new Date();
+    today.setHours(0, 0, 0, 0);
+    reservationDate.setHours(0, 0, 0, 0);
+    
+    if (reservationDate.getTime() !== today.getTime()) {
+        throw new Error('Bu QR kod bugün için geçerli değil');
+    }
+    
+    // Kullanıcı bilgilerini al
+    const userInfo = mockUsers[reservation.userId] || {
+        id: reservation.userId,
+        fullName: 'Bilinmeyen Kullanıcı',
+        studentNumber: 'N/A',
+        email: 'unknown@university.edu.tr',
+        department: 'Bilinmeyen Bölüm'
+    };
+    
+    return {
+        reservation: {
+            ...reservation,
+            user: userInfo
+        },
+        user: userInfo,
+        isValid: true
+    };
+}
+
+/**
+ * Rezervasyonu kullan (mock)
+ * @param {string} qrCode - QR kod
+ */
+export function useMockReservation(qrCode) {
+    // In-memory store'u başlat
+    initializeMockReservations();
+    
+    const reservation = mockReservationsStore.find(r => r.qrCode === qrCode);
+    
+    if (!reservation) {
+        throw new Error('Rezervasyon bulunamadı');
+    }
+    
+    if (reservation.status !== 'reserved') {
+        throw new Error('Bu rezervasyon zaten kullanılmış veya iptal edilmiş');
+    }
+    
+    // Rezervasyonu kullanıldı olarak işaretle
+    reservation.status = 'used';
+    reservation.usedAt = new Date().toISOString();
+    
+    return reservation;
+}
+
 export default {
     getMockMenus,
     createMockReservation,
     getMockMyReservations,
-    cancelMockReservation
+    cancelMockReservation,
+    validateMockQRCode,
+    useMockReservation
 };
 

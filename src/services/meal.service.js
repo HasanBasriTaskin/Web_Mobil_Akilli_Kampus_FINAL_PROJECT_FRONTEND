@@ -106,10 +106,81 @@ export async function cancelReservation(reservationId) {
     return result;
 }
 
+/**
+ * QR kod doğrula
+ * @param {string} qrCode - QR kod
+ */
+export async function validateQRCode(qrCode) {
+    const response = await fetch('/api/v1/meals/scan', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ qrCode })
+    });
+    
+    if (!response.ok) {
+        const errorText = await response.text();
+        let errorMessage = 'QR kod doğrulanamadı';
+        
+        try {
+            const errorJson = JSON.parse(errorText);
+            errorMessage = errorJson.message || errorMessage;
+        } catch {
+            errorMessage = errorText || errorMessage;
+        }
+        
+        throw new Error(errorMessage);
+    }
+    
+    const result = await response.json();
+    return result;
+}
+
+/**
+ * Rezervasyonu kullan
+ * Dokümantasyona göre: POST /api/v1/meals/reservations/:id/use
+ * @param {string} reservationId - Rezervasyon ID
+ * @param {string} qrCode - QR kod (backend QR code'u da kabul edebilir, body'de gönderilir)
+ */
+export async function useReservation(reservationId, qrCode = null) {
+    // Dokümantasyona göre: POST /api/v1/meals/reservations/:id/use
+    const url = `/api/v1/meals/reservations/${reservationId}/use`;
+    
+    const body = qrCode ? { qrCode } : {};
+    
+    const response = await fetch(url, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body)
+    });
+    
+    if (!response.ok) {
+        const errorText = await response.text();
+        let errorMessage = 'Rezervasyon kullanılamadı';
+        
+        try {
+            const errorJson = JSON.parse(errorText);
+            errorMessage = errorJson.message || errorMessage;
+        } catch {
+            errorMessage = errorText || errorMessage;
+        }
+        
+        throw new Error(errorMessage);
+    }
+    
+    const result = await response.json();
+    return result;
+}
+
 export default {
     getMenus,
     createReservation,
     getMyReservations,
-    cancelReservation
+    cancelReservation,
+    validateQRCode,
+    useReservation
 };
 
