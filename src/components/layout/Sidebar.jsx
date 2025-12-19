@@ -114,6 +114,12 @@ const navItems = [
         icon: UtensilsCrossed,
         roles: ['Student', 'Faculty', 'Admin']
     },
+    {
+        title: 'Rezervasyonlarım',
+        href: '/meals/reservations',
+        icon: Calendar,
+        roles: ['Student', 'Faculty', 'Admin']
+    },
     // Others
     {
         title: 'Takvim',
