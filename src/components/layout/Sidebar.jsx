@@ -64,6 +64,12 @@ const navItems = [
         roles: ['Student']
     },
     {
+        title: 'Ders Programım',
+        href: '/schedule',
+        icon: Calendar,
+        roles: ['Student']
+    },
+    {
         title: 'Notlarım',
         href: '/grades',
         icon: Award,
