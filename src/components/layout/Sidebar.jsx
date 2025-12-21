@@ -70,6 +70,12 @@ const navItems = [
         roles: ['Student']
     },
     {
+        title: 'Ders Programım',
+        href: '/schedule',
+        icon: Calendar,
+        roles: ['Student']
+    },
+    {
         title: 'Notlarım',
         href: '/grades',
         icon: Award,
@@ -115,6 +121,13 @@ const navItems = [
         href: '/excuse-requests',
         icon: FileCheck,
         roles: ['Faculty', 'Student']
+    },
+    // Classroom Reservations
+    {
+        title: 'Derslik Rezervasyonları',
+        href: '/reservations',
+        icon: Calendar,
+        roles: ['Student', 'Faculty', 'Admin']
     },
     // Meal Service
     {
