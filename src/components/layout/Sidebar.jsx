@@ -50,6 +50,12 @@ const navItems = [
         icon: Users,
         roles: ['Admin']
     },
+    {
+        title: 'Program Oluşturma',
+        href: '/admin/scheduling/generate',
+        icon: Calendar,
+        roles: ['Admin']
+    },
     // Academic Management
     {
         title: 'Ders Kataloğu',
@@ -109,13 +115,6 @@ const navItems = [
         href: '/excuse-requests',
         icon: FileCheck,
         roles: ['Faculty', 'Student']
-    },
-    // Classroom Reservations
-    {
-        title: 'Derslik Rezervasyonları',
-        href: '/reservations',
-        icon: Calendar,
-        roles: ['Student', 'Faculty', 'Admin']
     },
     // Meal Service
     {
