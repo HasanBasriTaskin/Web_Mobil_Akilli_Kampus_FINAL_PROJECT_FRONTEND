@@ -19,7 +19,11 @@ import {
     ClipboardCheck,
     MapPin,
     FileCheck,
-    NotebookPen
+    NotebookPen,
+    UtensilsCrossed,
+    Wallet,
+    QrCode,
+    PartyPopper
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth.store';
@@ -46,6 +50,12 @@ const navItems = [
         icon: Users,
         roles: ['Admin']
     },
+    {
+        title: 'Program Oluşturma',
+        href: '/admin/scheduling/generate',
+        icon: Calendar,
+        roles: ['Admin']
+    },
     // Academic Management
     {
         title: 'Ders Kataloğu',
@@ -57,6 +67,12 @@ const navItems = [
         title: 'Kayıtlı Derslerim',
         href: '/my-courses',
         icon: GraduationCap,
+        roles: ['Student']
+    },
+    {
+        title: 'Ders Programım',
+        href: '/schedule',
+        icon: Calendar,
         roles: ['Student']
     },
     {
@@ -105,6 +121,58 @@ const navItems = [
         href: '/excuse-requests',
         icon: FileCheck,
         roles: ['Faculty', 'Student']
+    },
+    // Classroom Reservations
+    {
+        title: 'Derslik Rezervasyonları',
+        href: '/reservations',
+        icon: Calendar,
+        roles: ['Student', 'Faculty', 'Admin']
+    },
+    // Meal Service
+    {
+        title: 'Yemek Menüsü',
+        href: '/meals/menu',
+        icon: UtensilsCrossed,
+        roles: ['Student', 'Faculty', 'Admin']
+    },
+    {
+        title: 'Rezervasyonlarım',
+        href: '/meals/reservations',
+        icon: Calendar,
+        roles: ['Student', 'Faculty', 'Admin']
+    },
+    {
+        title: 'QR Kod Tarayıcı',
+        href: '/meals/scan',
+        icon: QrCode,
+        roles: ['Faculty', 'Admin']
+    },
+    // Wallet
+    {
+        title: 'Cüzdan',
+        href: '/wallet',
+        icon: Wallet,
+        roles: ['Student', 'Faculty', 'Admin']
+    },
+    // Event Management
+    {
+        title: 'Etkinlikler',
+        href: '/events',
+        icon: PartyPopper,
+        roles: ['Student', 'Faculty', 'Admin']
+    },
+    {
+        title: 'Etkinliklerim',
+        href: '/my-events',
+        icon: Calendar,
+        roles: ['Student', 'Faculty', 'Admin']
+    },
+    {
+        title: 'Etkinlik Check-in',
+        href: '/events/checkin',
+        icon: QrCode,
+        roles: ['Faculty', 'Admin']
     },
     // Others
     {
