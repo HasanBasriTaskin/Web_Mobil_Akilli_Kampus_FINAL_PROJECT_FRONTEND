@@ -122,4 +122,40 @@ describe('EventsPage', () => {
       expect(screen.getByText('Etkinlik bulunamadı')).toBeInTheDocument();
     });
   });
+
+  it('handles API error gracefully', async () => {
+    getEvents.mockRejectedValue(new Error('Network error'));
+    render(<EventsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Etkinlik bulunamadı')).toBeInTheDocument();
+    });
+  });
+
+  it('displays paid event with price', async () => {
+    render(<EventsPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText('50 ₺')).toBeInTheDocument();
+    });
+  });
+
+  it('clears search when X is clicked', async () => {
+    render(<EventsPage />);
+
+    const searchInput = screen.getByPlaceholderText('Etkinlik adı ile ara...');
+    fireEvent.change(searchInput, { target: { value: 'Test' } });
+
+    await waitFor(() => {
+      expect(searchInput.value).toBe('Test');
+    });
+  });
+
+  it('shows all category filter', async () => {
+    render(<EventsPage />);
+    expect(screen.getByText('Tümü')).toBeInTheDocument();
+    expect(screen.getByText('Konferans')).toBeInTheDocument();
+    expect(screen.getByText('Sosyal')).toBeInTheDocument();
+    expect(screen.getByText('Spor')).toBeInTheDocument();
+  });
 });

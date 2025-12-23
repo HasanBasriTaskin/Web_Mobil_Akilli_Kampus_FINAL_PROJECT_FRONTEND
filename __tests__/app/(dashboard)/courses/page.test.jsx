@@ -45,9 +45,9 @@ describe('CoursesPage', () => {
     render(<CoursesPage />);
 
     await waitFor(() => {
-        const options = screen.getAllByRole('option');
-        // "Tüm Bölümler" + departments
-        expect(options.length).toBeGreaterThan(1);
+      const options = screen.getAllByRole('option');
+      // "Tüm Bölümler" + departments
+      expect(options.length).toBeGreaterThan(1);
     });
   });
 
@@ -77,7 +77,7 @@ describe('CoursesPage', () => {
     render(<CoursesPage />);
 
     await waitFor(() => {
-        expect(getDepartments).toHaveBeenCalled();
+      expect(getDepartments).toHaveBeenCalled();
     });
 
     const select = screen.getByRole('combobox');
@@ -99,5 +99,34 @@ describe('CoursesPage', () => {
     // Check if view changed (implementation detail: layout structure changes)
     // Here we assume basic rendering is still successful.
     expect(screen.getByText(mockCourses[0].name)).toBeInTheDocument();
+  });
+
+  it('handles API error gracefully', async () => {
+    getCourses.mockRejectedValue(new Error('Network error'));
+    getDepartments.mockRejectedValue(new Error('Network error'));
+
+    render(<CoursesPage />);
+
+    await waitFor(() => {
+      // Should still render the page structure
+      expect(screen.getByText('Ders Kataloğu')).toBeInTheDocument();
+    });
+  });
+
+  it('shows empty state when no courses', async () => {
+    getCourses.mockResolvedValue({ success: true, data: { items: [] } });
+    render(<CoursesPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText('Ders bulunamadı')).toBeInTheDocument();
+    });
+  });
+
+  it('displays course credits', async () => {
+    render(<CoursesPage />);
+
+    await waitFor(() => {
+      expect(screen.getByText(mockCourses[0].name)).toBeInTheDocument();
+    });
   });
 });

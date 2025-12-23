@@ -64,7 +64,7 @@ describe('ProfilePage', () => {
 
     // Initially it might be loading, so wait for profile text to appear
     await waitFor(() => {
-        expect(screen.getByText('Profilim')).toBeInTheDocument();
+      expect(screen.getByText('Profilim')).toBeInTheDocument();
     });
 
     expect(screen.getByDisplayValue('Test User')).toBeInTheDocument();
@@ -119,6 +119,48 @@ describe('ProfilePage', () => {
       expect(screen.getByText('Ofis Konumu')).toBeInTheDocument();
       expect(screen.getByDisplayValue('Room 101')).toBeInTheDocument();
       expect(screen.getByDisplayValue('EMP123')).toBeInTheDocument();
+    });
+  });
+
+  it('shows loading state when no user', async () => {
+    useAuthStore.mockReturnValue({ user: null, setUser: setUserMock });
+    getProfile.mockResolvedValue({ success: true, data: null });
+
+    render(<ProfilePage />);
+
+    // Should show loading spinner
+    const spinner = document.querySelector('.animate-spin');
+    expect(spinner).toBeInTheDocument();
+  });
+
+  it('handles profile update error', async () => {
+    updateProfile.mockRejectedValue(new Error('Update failed'));
+    render(<ProfilePage />);
+
+    await waitFor(() => expect(screen.getByDisplayValue('Test User')).toBeInTheDocument());
+
+    const submitBtn = screen.getByRole('button', { name: /değişiklikleri kaydet/i });
+    fireEvent.click(submitBtn);
+
+    await waitFor(() => {
+      expect(toast.error).toHaveBeenCalled();
+    });
+  });
+
+  it('displays student number for student users', async () => {
+    render(<ProfilePage />);
+
+    await waitFor(() => {
+      expect(screen.getByDisplayValue('12345')).toBeInTheDocument();
+    });
+  });
+
+  it('displays email as read-only', async () => {
+    render(<ProfilePage />);
+
+    await waitFor(() => {
+      const emailInput = screen.getByDisplayValue('test@example.com');
+      expect(emailInput).toBeDisabled();
     });
   });
 });

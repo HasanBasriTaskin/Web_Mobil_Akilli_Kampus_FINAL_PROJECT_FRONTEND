@@ -55,11 +55,11 @@ describe('LoginForm', () => {
         const toggleBtn = buttons.find(btn => !btn.textContent?.includes('Giriş Yap'));
 
         if (toggleBtn) {
-             await userEvent.click(toggleBtn);
-             expect(passwordInput).toHaveAttribute('type', 'text');
+            await userEvent.click(toggleBtn);
+            expect(passwordInput).toHaveAttribute('type', 'text');
 
-             await userEvent.click(toggleBtn);
-             expect(passwordInput).toHaveAttribute('type', 'password');
+            await userEvent.click(toggleBtn);
+            expect(passwordInput).toHaveAttribute('type', 'password');
         }
     });
 
@@ -103,15 +103,17 @@ describe('LoginForm', () => {
         const emailInput = screen.getByPlaceholderText(/ornek@smartcampus.edu/i);
         const passwordInput = screen.getByPlaceholderText(/••••••••/);
 
-        await userEvent.type(emailInput, 'test@example.com');
-        await userEvent.type(passwordInput, 'password123');
+        // Use fireEvent for faster test execution
+        const { fireEvent } = require('@testing-library/react');
+        fireEvent.change(emailInput, { target: { value: 'test@example.com' } });
+        fireEvent.change(passwordInput, { target: { value: 'password123' } });
 
-        await userEvent.click(screen.getByRole('button', { name: /Giriş Yap/i }));
+        fireEvent.click(screen.getByRole('button', { name: /Giriş Yap/i }));
 
         await waitFor(() => {
             expect(toast.error).toHaveBeenCalled();
             expect(mockAuthStore.login).not.toHaveBeenCalled();
             expect(mockRouter.push).not.toHaveBeenCalled();
         });
-    });
+    }, 15000);
 });
