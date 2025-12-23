@@ -500,7 +500,7 @@ export default function SchedulePage() {
         try {
             setLoading(true);
             const response = await getMySchedule();
-            if (response.data && response.data.ScheduleItems && response.data.ScheduleItems.length > 0) {
+            if (response.success) {
                 setSchedule(response.data);
             } else {
                 setSchedule(mockSchedule);
