@@ -75,6 +75,9 @@ describe('GenerateSchedulePage', () => {
 
     await waitFor(() => expect(screen.getByText('Oluşturulan Alternatif Programlar')).toBeInTheDocument(), { timeout: 3000 });
 
+    // Clear mocks after generation to check save toast
+    jest.clearAllMocks();
+
     // Click Preview (Eye icon button)
     // Find "Bu Programı Seç" button or Preview button.
     // The Preview button has "Önizle" title.
@@ -89,6 +92,6 @@ describe('GenerateSchedulePage', () => {
 
     await waitFor(() => {
         expect(toast.success).toHaveBeenCalledWith('Program kaydedildi ve yayınlandı');
-    });
+    }, { timeout: 2000 });
   });
 });

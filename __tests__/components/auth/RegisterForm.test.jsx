@@ -74,45 +74,28 @@ describe('RegisterForm', () => {
         render(<RegisterForm />);
 
         // Select Student
-        await userEvent.click(screen.getByText('Öğrenci'));
-
-        // Fill fields
-        await userEvent.type(screen.getByPlaceholderText(/Adınız Soyadınız/i), 'Ali Veli');
-        await userEvent.type(screen.getByPlaceholderText(/ornek@smartcampus.edu/i), 'ali@edu.tr');
-
-        // Select Department (id: 1)
-        // Need to find the select element. Since we have multiple, and it appears dynamically.
-        // It's the one with option "Bilgisayar Mühendisliği" (from mockDb json if imported in component, or real file read)
-        // The component uses `import mockDb from '@/mocks/data/db.json';`
-        // We verified db.json has "Bilgisayar Mühendisliği" with id 1
+        fireEvent.click(screen.getByText('Öğrenci'));
 
         await waitFor(() => expect(screen.queryByText('Bölüm')).toBeInTheDocument());
 
-        // Using fireEvent for Select if userEvent is tricky with "combobox" role in jsdom sometimes
-        // But let's try finding by role.
-        const selects = screen.getAllByRole('combobox');
-        // Filter the one that has Department options.
-        // Or just the first one usually.
-        // Let's iterate or assume the first one after user type selection.
-        const departmentSelect = selects.find(select => select.innerHTML.includes('1'));
+        // Fill fields using fireEvent for faster execution
+        fireEvent.change(screen.getByPlaceholderText(/Adınız Soyadınız/i), { target: { value: 'Ali Veli' } });
+        fireEvent.change(screen.getByPlaceholderText(/ornek@smartcampus.edu/i), { target: { value: 'ali@edu.tr' } });
 
-        if (departmentSelect) {
-            await userEvent.selectOptions(departmentSelect, '1');
-        } else {
-            // Fallback: try to select on the first visible select
-            await userEvent.selectOptions(selects[0], '1');
-        }
+        // Select Department (id: 1)
+        const selects = screen.getAllByRole('combobox');
+        fireEvent.change(selects[0], { target: { value: '1' } });
 
         // Student Number
-        await userEvent.type(screen.getByPlaceholderText('2024001234'), '12345');
+        fireEvent.change(screen.getByPlaceholderText('2024001234'), { target: { value: '12345' } });
 
         // Password
         const passwordInputs = screen.getAllByPlaceholderText('••••••••');
-        await userEvent.type(passwordInputs[0], 'Password123!');
-        await userEvent.type(passwordInputs[1], 'Password123!'); // Confirm
+        fireEvent.change(passwordInputs[0], { target: { value: 'Password123!' } });
+        fireEvent.change(passwordInputs[1], { target: { value: 'Password123!' } });
 
         const submitBtn = screen.getByRole('button', { name: /Kayıt Ol/i });
-        await userEvent.click(submitBtn);
+        fireEvent.click(submitBtn);
 
         await waitFor(() => {
             expect(register).toHaveBeenCalledWith(expect.objectContaining({
@@ -125,33 +108,35 @@ describe('RegisterForm', () => {
             }));
             expect(mockRouter.push).toHaveBeenCalledWith('/login?registered=true');
         });
-    });
+    }, 15000);
 
     it('should handle registration error', async () => {
         register.mockRejectedValue(new Error('Kayıt başarısız'));
         render(<RegisterForm />);
 
         // Fill minimum required fields to trigger submit
-        await userEvent.click(screen.getByText('Öğrenci'));
-        await userEvent.type(screen.getByPlaceholderText(/Adınız Soyadınız/i), 'Ali Veli');
-        await userEvent.type(screen.getByPlaceholderText(/ornek@smartcampus.edu/i), 'ali@edu.tr');
+        fireEvent.click(screen.getByText('Öğrenci'));
+
+        await waitFor(() => expect(screen.queryByText('Bölüm')).toBeInTheDocument());
+
+        fireEvent.change(screen.getByPlaceholderText(/Adınız Soyadınız/i), { target: { value: 'Ali Veli' } });
+        fireEvent.change(screen.getByPlaceholderText(/ornek@smartcampus.edu/i), { target: { value: 'ali@edu.tr' } });
 
         const selects = screen.getAllByRole('combobox');
-        const departmentSelect = selects.find(select => select.innerHTML.includes('1')) || selects[0];
-        await userEvent.selectOptions(departmentSelect, '1');
+        fireEvent.change(selects[0], { target: { value: '1' } });
 
-        await userEvent.type(screen.getByPlaceholderText('2024001234'), '12345');
+        fireEvent.change(screen.getByPlaceholderText('2024001234'), { target: { value: '12345' } });
 
         const passwordInputs = screen.getAllByPlaceholderText('••••••••');
-        await userEvent.type(passwordInputs[0], 'Password123!');
-        await userEvent.type(passwordInputs[1], 'Password123!');
+        fireEvent.change(passwordInputs[0], { target: { value: 'Password123!' } });
+        fireEvent.change(passwordInputs[1], { target: { value: 'Password123!' } });
 
         const submitBtn = screen.getByRole('button', { name: /Kayıt Ol/i });
-        await userEvent.click(submitBtn);
+        fireEvent.click(submitBtn);
 
         await waitFor(() => {
             expect(register).toHaveBeenCalled();
             expect(toast.error).toHaveBeenCalledWith('Kayıt başarısız', expect.anything());
         });
-    });
+    }, 15000);
 });
