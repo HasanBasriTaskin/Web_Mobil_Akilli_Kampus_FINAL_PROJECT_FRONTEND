@@ -56,6 +56,12 @@ const navItems = [
         icon: Calendar,
         roles: ['Admin']
     },
+    {
+        title: 'Yemek Yönetimi',
+        href: '/admin/meals',
+        icon: UtensilsCrossed,
+        roles: ['Admin']
+    },
     // Academic Management
     {
         title: 'Ders Kataloğu',
