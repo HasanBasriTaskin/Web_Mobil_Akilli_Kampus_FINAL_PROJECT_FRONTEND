@@ -15,6 +15,7 @@ import {
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/stores/auth.store';
 import { logout } from '@/services/auth.service';
+import { NotificationBell } from '@/components/notifications/NotificationBell';
 
 /**
  * Navbar Component
@@ -62,10 +63,7 @@ export function Navbar({ onMenuClick }) {
                 {/* Right: Notifications + User menu */}
                 <div className="flex items-center gap-2">
                     {/* Notifications */}
-                    <Button variant="ghost" size="icon" className="relative">
-                        <Bell className="size-5" />
-                        <span className="absolute top-1.5 right-1.5 size-2 rounded-full bg-red-500" />
-                    </Button>
+                    <NotificationBell />
 
                     {/* User info */}
                     <div className="flex items-center gap-3 pl-2 border-l border-border">
