@@ -46,9 +46,10 @@ export default function MealMenuPage() {
         try {
             setReserving(true);
             await createReservation({
-                menuId: selectedMeal.id,
-                mealType: selectedMeal.mealType,
-                date: selectedDate.toISOString().split('T')[0]
+                MenuId: selectedMeal.id,
+                CafeteriaId: selectedMeal.cafeteriaId,
+                MealType: selectedMeal.mealType,
+                Date: selectedDate.toISOString().split('T')[0]
             });
             toast.success('Rezervasyon başarıyla oluşturuldu!');
             setSelectedMeal(null);
@@ -68,8 +69,10 @@ export default function MealMenuPage() {
         return date;
     });
 
-    const lunchMenus = menus.filter(m => m.mealType === 'lunch');
-    const dinnerMenus = menus.filter(m => m.mealType === 'dinner');
+    // Backend MealType enum: 1=Breakfast, 2=Lunch, 3=Dinner
+    const breakfastMenus = menus.filter(m => m.mealType === 1 || m.mealType === 'Breakfast');
+    const lunchMenus = menus.filter(m => m.mealType === 2 || m.mealType === 'Lunch' || m.mealType === 'lunch');
+    const dinnerMenus = menus.filter(m => m.mealType === 3 || m.mealType === 'Dinner' || m.mealType === 'dinner');
 
     return (
         <div className="space-y-6">
@@ -80,7 +83,7 @@ export default function MealMenuPage() {
                 className="relative rounded-xl overflow-hidden bg-white/80 dark:bg-slate-800/70 border border-border"
             >
                 {/* Background Image */}
-                <div 
+                <div
                     className="absolute inset-0 bg-contain bg-no-repeat"
                     style={{
                         backgroundImage: 'url(https://images.pexels.com/photos/1640773/pexels-photo-1640773.jpeg?auto=compress&cs=tinysrgb&w=1600&h=250&fit=crop)',
@@ -90,7 +93,7 @@ export default function MealMenuPage() {
                         backgroundPosition: 'center top'
                     }}
                 />
-                
+
                 {/* Header */}
                 <div className="relative p-6 pb-4">
                     <h1 className="text-2xl lg:text-3xl font-bold">Yemek Menüsü</h1>
@@ -99,41 +102,41 @@ export default function MealMenuPage() {
                 {/* Calendar Selector - Day Card View */}
                 <div className="relative p-4 pt-0">
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-7 gap-3">
-                    {dates.map((date, index) => {
-                        const isSelected = date.toDateString() === selectedDate.toDateString();
-                        const isToday = date.toDateString() === today.toDateString();
-                        return (
-                            <motion.button
-                                key={index}
-                                onClick={() => setSelectedDate(date)}
-                                whileHover={{ scale: 1.05, y: -2 }}
-                                whileTap={{ scale: 0.95 }}
-                                className={`
+                        {dates.map((date, index) => {
+                            const isSelected = date.toDateString() === selectedDate.toDateString();
+                            const isToday = date.toDateString() === today.toDateString();
+                            return (
+                                <motion.button
+                                    key={index}
+                                    onClick={() => setSelectedDate(date)}
+                                    whileHover={{ scale: 1.05, y: -2 }}
+                                    whileTap={{ scale: 0.95 }}
+                                    className={`
                                     rounded-xl border-2 transition-all p-3 text-center
                                     ${isSelected
-                                        ? 'border-blue-500 bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/40'
-                                        : 'border-border hover:border-blue-500/50 hover:bg-blue-50 dark:hover:bg-blue-950/20 bg-white dark:bg-slate-800'
-                                    }
+                                            ? 'border-blue-500 bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700 text-white shadow-lg shadow-blue-500/40'
+                                            : 'border-border hover:border-blue-500/50 hover:bg-blue-50 dark:hover:bg-blue-950/20 bg-white dark:bg-slate-800'
+                                        }
                                     ${isToday && !isSelected ? 'ring-2 ring-blue-500/30 bg-blue-50/50 dark:bg-blue-950/10' : ''}
                                 `}
-                            >
-                                <div className={`text-xs font-medium mb-1 ${isSelected ? 'text-white/90' : 'text-muted-foreground'}`}>
-                                    {date.toLocaleDateString('tr-TR', { weekday: 'long' })}
-                                </div>
-                                <div className={`text-2xl font-bold mb-1 ${isSelected ? 'text-white' : 'text-foreground'}`}>
-                                    {date.getDate()}
-                                </div>
-                                <div className={`text-xs ${isSelected ? 'text-white/80' : 'text-muted-foreground'}`}>
-                                    {date.toLocaleDateString('tr-TR', { month: 'long' })}
-                                </div>
-                                {isToday && (
-                                    <div className={`mt-1 text-[10px] font-medium ${isSelected ? 'text-white/90' : 'text-blue-600 dark:text-blue-400'}`}>
-                                        Bugün
+                                >
+                                    <div className={`text-xs font-medium mb-1 ${isSelected ? 'text-white/90' : 'text-muted-foreground'}`}>
+                                        {date.toLocaleDateString('tr-TR', { weekday: 'long' })}
                                     </div>
-                                )}
-                            </motion.button>
-                        );
-                    })}
+                                    <div className={`text-2xl font-bold mb-1 ${isSelected ? 'text-white' : 'text-foreground'}`}>
+                                        {date.getDate()}
+                                    </div>
+                                    <div className={`text-xs ${isSelected ? 'text-white/80' : 'text-muted-foreground'}`}>
+                                        {date.toLocaleDateString('tr-TR', { month: 'long' })}
+                                    </div>
+                                    {isToday && (
+                                        <div className={`mt-1 text-[10px] font-medium ${isSelected ? 'text-white/90' : 'text-blue-600 dark:text-blue-400'}`}>
+                                            Bugün
+                                        </div>
+                                    )}
+                                </motion.button>
+                            );
+                        })}
                     </div>
                 </div>
             </motion.div>
@@ -187,6 +190,7 @@ export default function MealMenuPage() {
 function MealCard({ type, menus, onReserve, date }) {
     const menu = menus[0];
     const isLunch = type === 'lunch';
+    const isBreakfast = type === 'breakfast';
 
     if (!menu) {
         return (
@@ -196,11 +200,11 @@ function MealCard({ type, menus, onReserve, date }) {
                 className="rounded-xl bg-white dark:bg-slate-800/50 border border-border p-6"
             >
                 <div className="flex items-center gap-3 mb-4">
-                    <div className={`p-2 rounded-lg ${isLunch ? 'bg-blue-100 dark:bg-blue-900/30' : 'bg-indigo-100 dark:bg-indigo-900/30'}`}>
-                        <UtensilsCrossed className={`size-5 ${isLunch ? 'text-blue-600 dark:text-blue-400' : 'text-indigo-600 dark:text-indigo-400'}`} />
+                    <div className={`p-2 rounded-lg ${isLunch ? 'bg-blue-100 dark:bg-blue-900/30' : isBreakfast ? 'bg-amber-100 dark:bg-amber-900/30' : 'bg-indigo-100 dark:bg-indigo-900/30'}`}>
+                        <UtensilsCrossed className={`size-5 ${isLunch ? 'text-blue-600 dark:text-blue-400' : isBreakfast ? 'text-amber-600 dark:text-amber-400' : 'text-indigo-600 dark:text-indigo-400'}`} />
                     </div>
                     <h2 className="text-lg font-semibold">
-                        {isLunch ? 'Öğle Yemeği' : 'Akşam Yemeği'}
+                        {isBreakfast ? 'Kahvaltı' : isLunch ? 'Öğle Yemeği' : 'Akşam Yemeği'}
                     </h2>
                 </div>
                 <p className="text-muted-foreground text-center py-8">
@@ -210,7 +214,14 @@ function MealCard({ type, menus, onReserve, date }) {
         );
     }
 
-    const items = typeof menu.items === 'string' ? JSON.parse(menu.items) : menu.items;
+    // Backend'den gelen foodItems array'i veya items string'i
+    let items = [];
+    if (menu.foodItems && Array.isArray(menu.foodItems)) {
+        items = menu.foodItems.map(fi => fi.name || fi);
+    } else if (menu.items) {
+        items = typeof menu.items === 'string' ? JSON.parse(menu.items) : menu.items;
+    }
+
     const nutrition = typeof menu.nutrition === 'string' ? JSON.parse(menu.nutrition) : menu.nutrition;
 
     return (
@@ -328,8 +339,16 @@ function MealCard({ type, menus, onReserve, date }) {
  * Reservation Modal Component
  */
 function ReservationModal({ meal, date, onClose, onConfirm, loading }) {
-    const items = typeof meal.items === 'string' ? JSON.parse(meal.items) : meal.items;
-    const isLunch = meal.mealType === 'lunch';
+    // Backend'den gelen foodItems array'i veya items string'i
+    let items = [];
+    if (meal.foodItems && Array.isArray(meal.foodItems)) {
+        items = meal.foodItems.map(fi => fi.name || fi);
+    } else if (meal.items) {
+        items = typeof meal.items === 'string' ? JSON.parse(meal.items) : meal.items;
+    }
+
+    // Backend MealType enum: 1=Breakfast, 2=Lunch, 3=Dinner
+    const isLunch = meal.mealType === 2 || meal.mealType === 'Lunch' || meal.mealType === 'lunch';
 
     // Menü öğelerini kategorilere ayır
     const categorizeItems = (items) => {
@@ -379,14 +398,13 @@ function ReservationModal({ meal, date, onClose, onConfirm, loading }) {
                 className="w-full max-w-sm rounded-2xl overflow-hidden bg-white dark:bg-slate-900 shadow-2xl"
             >
                 {/* Header with Image Background */}
-                <div className={`relative h-36 overflow-hidden ${
-                    isLunch
-                        ? 'bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700'
-                        : 'bg-gradient-to-br from-purple-500 via-purple-600 to-purple-700'
-                }`}>
+                <div className={`relative h-36 overflow-hidden ${isLunch
+                    ? 'bg-gradient-to-br from-blue-500 via-blue-600 to-blue-700'
+                    : 'bg-gradient-to-br from-purple-500 via-purple-600 to-purple-700'
+                    }`}>
                     {/* Pattern overlay */}
                     <div className="absolute inset-0 bg-[url('data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNjAiIGhlaWdodD0iNjAiIHZpZXdCb3g9IjAgMCA2MCA2MCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48ZyBmaWxsPSJub25lIiBmaWxsLXJ1bGU9ImV2ZW5vZGQiPjxnIGZpbGw9IiNmZmYiIGZpbGwtb3BhY2l0eT0iMC4xIj48Y2lyY2xlIGN4PSIzMCIgY3k9IjMwIiByPSIyIi8+PC9nPjwvZz48L3N2Zz4=')] opacity-20"></div>
-                    
+
                     <div className="relative h-full flex flex-col justify-between p-4">
                         <div className="flex items-start justify-between">
                             <div>
@@ -405,11 +423,10 @@ function ReservationModal({ meal, date, onClose, onConfirm, loading }) {
 
                 {/* Date and Meal Type Badge */}
                 <div className="px-4 -mt-5 mb-3 relative z-10">
-                    <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${
-                        isLunch 
-                            ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300' 
-                            : 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
-                    }`}>
+                    <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full text-xs font-medium ${isLunch
+                        ? 'bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300'
+                        : 'bg-purple-100 dark:bg-purple-900/30 text-purple-700 dark:text-purple-300'
+                        }`}>
                         <Calendar className="size-3" />
                         <span>{dateStr.split(',')[0]}, {dateStr.split(',')[1]} • {mealTypeStr}</span>
                     </div>
@@ -422,22 +439,20 @@ function ReservationModal({ meal, date, onClose, onConfirm, loading }) {
                         const Icon = category.icon;
                         return (
                             <div key={catIndex} className="space-y-1.5">
-                                <div className={`flex items-center gap-2 text-[10px] font-semibold uppercase tracking-wide ${
-                                    isLunch
-                                        ? 'text-blue-600 dark:text-blue-400'
-                                        : 'text-purple-600 dark:text-purple-400'
-                                }`}>
+                                <div className={`flex items-center gap-2 text-[10px] font-semibold uppercase tracking-wide ${isLunch
+                                    ? 'text-blue-600 dark:text-blue-400'
+                                    : 'text-purple-600 dark:text-purple-400'
+                                    }`}>
                                     <Icon className="size-3" />
                                     <span>{category.label}</span>
                                 </div>
                                 <ul className="space-y-1.5">
                                     {category.items.map((item, index) => (
                                         <li key={index} className="flex items-center gap-2 text-xs">
-                                            <div className={`size-1.5 rounded-full ${
-                                                isLunch
-                                                    ? 'bg-blue-400 dark:bg-blue-500'
-                                                    : 'bg-purple-400 dark:bg-purple-500'
-                                            }`}></div>
+                                            <div className={`size-1.5 rounded-full ${isLunch
+                                                ? 'bg-blue-400 dark:bg-blue-500'
+                                                : 'bg-purple-400 dark:bg-purple-500'
+                                                }`}></div>
                                             <span className="text-foreground">{item}</span>
                                         </li>
                                     ))}
@@ -461,11 +476,10 @@ function ReservationModal({ meal, date, onClose, onConfirm, loading }) {
                     <Button
                         onClick={onConfirm}
                         disabled={loading}
-                        className={`flex-1 text-white shadow-lg text-xs h-9 ${
-                            isLunch
-                                ? 'bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:from-blue-600 hover:via-blue-700 hover:to-blue-800 shadow-blue-500/30'
-                                : 'bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 hover:from-purple-600 hover:via-purple-700 hover:to-purple-800 shadow-purple-500/30'
-                        }`}
+                        className={`flex-1 text-white shadow-lg text-xs h-9 ${isLunch
+                            ? 'bg-gradient-to-r from-blue-500 via-blue-600 to-blue-700 hover:from-blue-600 hover:via-blue-700 hover:to-blue-800 shadow-blue-500/30'
+                            : 'bg-gradient-to-r from-purple-500 via-purple-600 to-purple-700 hover:from-purple-600 hover:via-purple-700 hover:to-purple-800 shadow-purple-500/30'
+                            }`}
                     >
                         {loading ? (
                             'Rezervasyon yapılıyor...'

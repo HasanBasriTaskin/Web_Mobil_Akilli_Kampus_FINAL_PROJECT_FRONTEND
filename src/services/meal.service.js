@@ -1,186 +1,118 @@
 /**
  * Meal Service - Yemek servisi için API entegrasyonu
  * Menu Page için gerekli fonksiyonlar
- * Backend endpoint'leri hazır olmadığı için mock API kullanılıyor
+ * Backend endpoint'leri: MealMenusController, MealReservationsController
  */
+
+import { get, post, del } from './api-client';
 
 /**
  * Menü listesi getir
- * @param {object} params - { date, cafeteriaId }
+ * Backend: GET /api/v1/MealMenus
+ * @param {object} params - { date, cafeteriaId, mealType }
  */
 export async function getMenus(params = {}) {
     const queryParams = new URLSearchParams();
     if (params.date) queryParams.append('date', params.date);
     if (params.cafeteriaId) queryParams.append('cafeteriaId', params.cafeteriaId);
+    if (params.mealType) queryParams.append('mealType', params.mealType);
 
     const queryString = queryParams.toString();
-    const response = await fetch(`/api/v1/meals/menus${queryString ? `?${queryString}` : ''}`);
-    
-    if (!response.ok) {
-        throw new Error('Menüler yüklenemedi');
-    }
-    
-    const data = await response.json();
-    return data;
+    const endpoint = `/MealMenus${queryString ? `?${queryString}` : ''}`;
+
+    return await get(endpoint);
+}
+
+/**
+ * Menü detayı getir
+ * Backend: GET /api/v1/MealMenus/{id}
+ * @param {number} menuId - Menü ID
+ */
+export async function getMenuById(menuId) {
+    return await get(`/MealMenus/${menuId}`);
 }
 
 /**
  * Yemek rezervasyonu yap
- * @param {object} data - { menuId, mealType, date }
+ * Backend: POST /api/v1/MealReservations
+ * @param {object} data - { menuId, ... }
  */
 export async function createReservation(data) {
-    const response = await fetch('/api/v1/meals/reservations', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(data)
-    });
-    
-    if (!response.ok) {
-        const errorText = await response.text();
-        let errorMessage = 'Rezervasyon yapılamadı';
-        
-        try {
-            const errorJson = JSON.parse(errorText);
-            errorMessage = errorJson.message || errorMessage;
-        } catch {
-            errorMessage = errorText || errorMessage;
-        }
-        
-        throw new Error(errorMessage);
-    }
-    
-    const result = await response.json();
-    return result;
+    return await post('/MealReservations', data);
 }
 
 /**
  * Kullanıcının rezervasyonlarını getir
- * @param {object} params - { status, dateFrom, dateTo }
+ * Backend: GET /api/v1/MealReservations/my-reservations
+ * @param {object} params - { fromDate, toDate }
  */
 export async function getMyReservations(params = {}) {
     const queryParams = new URLSearchParams();
-    if (params.status) queryParams.append('status', params.status);
-    if (params.dateFrom) queryParams.append('dateFrom', params.dateFrom);
-    if (params.dateTo) queryParams.append('dateTo', params.dateTo);
+    if (params.fromDate) queryParams.append('fromDate', params.fromDate);
+    if (params.toDate) queryParams.append('toDate', params.toDate);
 
     const queryString = queryParams.toString();
-    const response = await fetch(`/api/v1/meals/my-reservations${queryString ? `?${queryString}` : ''}`);
-    
-    if (!response.ok) {
-        throw new Error('Rezervasyonlar yüklenemedi');
-    }
-    
-    const data = await response.json();
-    return data;
+    const endpoint = `/MealReservations/my-reservations${queryString ? `?${queryString}` : ''}`;
+
+    return await get(endpoint);
+}
+
+/**
+ * Rezervasyon detayı getir
+ * Backend: GET /api/v1/MealReservations/{id}
+ * @param {number} reservationId - Rezervasyon ID
+ */
+export async function getReservationById(reservationId) {
+    return await get(`/MealReservations/${reservationId}`);
 }
 
 /**
  * Rezervasyon iptal et
- * @param {string} reservationId - Rezervasyon ID
+ * Backend: DELETE /api/v1/MealReservations/{id}
+ * @param {number} reservationId - Rezervasyon ID
  */
 export async function cancelReservation(reservationId) {
-    const response = await fetch(`/api/v1/meals/reservations/${reservationId}/cancel`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        }
-    });
-    
-    if (!response.ok) {
-        const errorText = await response.text();
-        let errorMessage = 'Rezervasyon iptal edilemedi';
-        
-        try {
-            const errorJson = JSON.parse(errorText);
-            errorMessage = errorJson.message || errorMessage;
-        } catch {
-            errorMessage = errorText || errorMessage;
-        }
-        
-        throw new Error(errorMessage);
-    }
-    
-    const result = await response.json();
-    return result;
+    return await del(`/MealReservations/${reservationId}`);
 }
 
 /**
- * QR kod doğrula
+ * QR kod tarama (Admin/CafeteriaStaff)
+ * Backend: POST /api/v1/MealReservations/scan
  * @param {string} qrCode - QR kod
  */
-export async function validateQRCode(qrCode) {
-    const response = await fetch('/api/v1/meals/scan', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ qrCode })
-    });
-    
-    if (!response.ok) {
-        const errorText = await response.text();
-        let errorMessage = 'QR kod doğrulanamadı';
-        
-        try {
-            const errorJson = JSON.parse(errorText);
-            errorMessage = errorJson.message || errorMessage;
-        } catch {
-            errorMessage = errorText || errorMessage;
-        }
-        
-        throw new Error(errorMessage);
-    }
-    
-    const result = await response.json();
-    return result;
+export async function scanQRCode(qrCode) {
+    return await post('/MealReservations/scan', { QRCode: qrCode });
 }
 
 /**
- * Rezervasyonu kullan
- * Dokümantasyona göre: POST /api/v1/meals/reservations/:id/use
- * @param {string} reservationId - Rezervasyon ID
- * @param {string} qrCode - QR kod (backend QR code'u da kabul edebilir, body'de gönderilir)
+ * QR kod ile rezervasyon getir (Admin/CafeteriaStaff)
+ * Backend: GET /api/v1/MealReservations/qr/{qrCode}
+ * @param {string} qrCode - QR kod
+ */
+export async function getReservationByQR(qrCode) {
+    return await get(`/MealReservations/qr/${encodeURIComponent(qrCode)}`);
+}
+
+/**
+ * Rezervasyonu kullan (scan sayfası için)
+ * Backend: POST /api/v1/MealReservations/{id}/use endpoint'i olmayabilir,
+ * bu durumda scan endpoint'i kullanılır
+ * @param {number} reservationId - Rezervasyon ID
+ * @param {string} qrCode - QR kod
  */
 export async function useReservation(reservationId, qrCode = null) {
-    // Dokümantasyona göre: POST /api/v1/meals/reservations/:id/use
-    const url = `/api/v1/meals/reservations/${reservationId}/use`;
-    
-    const body = qrCode ? { qrCode } : {};
-    
-    const response = await fetch(url, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body)
-    });
-    
-    if (!response.ok) {
-        const errorText = await response.text();
-        let errorMessage = 'Rezervasyon kullanılamadı';
-        
-        try {
-            const errorJson = JSON.parse(errorText);
-            errorMessage = errorJson.message || errorMessage;
-        } catch {
-            errorMessage = errorText || errorMessage;
-        }
-        
-        throw new Error(errorMessage);
-    }
-    
-    const result = await response.json();
-    return result;
+    // Backend'de /use endpoint'i yoksa scan kullan
+    return await post('/MealReservations/scan', { QRCode: qrCode });
 }
 
 export default {
     getMenus,
+    getMenuById,
     createReservation,
     getMyReservations,
+    getReservationById,
     cancelReservation,
-    validateQRCode,
+    scanQRCode,
+    getReservationByQR,
     useReservation
 };
-

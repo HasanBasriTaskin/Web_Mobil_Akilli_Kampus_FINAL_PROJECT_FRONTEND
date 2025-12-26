@@ -50,6 +50,18 @@ const navItems = [
         icon: Users,
         roles: ['Admin']
     },
+    {
+        title: 'Program Oluşturma',
+        href: '/admin/scheduling/generate',
+        icon: Calendar,
+        roles: ['Admin']
+    },
+    {
+        title: 'Yemek Yönetimi',
+        href: '/admin/meals',
+        icon: UtensilsCrossed,
+        roles: ['Admin']
+    },
     // Academic Management
     {
         title: 'Ders Kataloğu',
@@ -61,6 +73,12 @@ const navItems = [
         title: 'Kayıtlı Derslerim',
         href: '/my-courses',
         icon: GraduationCap,
+        roles: ['Student']
+    },
+    {
+        title: 'Ders Programım',
+        href: '/schedule',
+        icon: Calendar,
         roles: ['Student']
     },
     {
@@ -109,6 +127,13 @@ const navItems = [
         href: '/excuse-requests',
         icon: FileCheck,
         roles: ['Faculty', 'Student']
+    },
+    // Classroom Reservations
+    {
+        title: 'Derslik Rezervasyonları',
+        href: '/reservations',
+        icon: Calendar,
+        roles: ['Student', 'Faculty', 'Admin']
     },
     // Meal Service
     {
