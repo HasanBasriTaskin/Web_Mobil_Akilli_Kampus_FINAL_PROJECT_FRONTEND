@@ -46,9 +46,18 @@ export function ProfilePictureUpload({ currentPicture, onUploadSuccess }) {
         setIsUploading(true);
         try {
             const response = await uploadProfilePicture(file);
-            if (response.success) {
+            // Backend Response<string> formatı: { isSuccessful: true, data: "/uploads/..." }
+            const isSuccess = response.success || response.isSuccessful;
+            // data direkt URL string'i olabilir veya profilePictureUrl içinde olabilir
+            const pictureUrl = typeof response.data === 'string'
+                ? response.data
+                : response.data?.profilePictureUrl || response.data;
+
+            if (isSuccess && pictureUrl) {
                 toast.success('Profil fotoğrafı güncellendi');
-                onUploadSuccess?.(response.data?.profilePictureUrl);
+                onUploadSuccess?.(pictureUrl);
+            } else {
+                toast.error('Fotoğraf yüklenemedi');
             }
         } catch (error) {
             toast.error('Fotoğraf yüklenemedi', {

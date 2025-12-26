@@ -75,7 +75,23 @@ export function Navbar({ onMenuClick }) {
                         {/* Avatar */}
                         <div className="relative">
                             <button className="flex items-center gap-1 group">
-                                <div className="size-9 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white text-sm font-medium">
+                                {user?.profilePictureUrl ? (
+                                    <img
+                                        src={user.profilePictureUrl.startsWith('http')
+                                            ? user.profilePictureUrl
+                                            : `http://127.0.0.1:5150${user.profilePictureUrl}`
+                                        }
+                                        alt={user.fullName || 'Profil'}
+                                        className="size-9 rounded-full object-cover border-2 border-violet-500/20"
+                                        onError={(e) => {
+                                            e.target.style.display = 'none';
+                                            e.target.nextSibling.style.display = 'flex';
+                                        }}
+                                    />
+                                ) : null}
+                                <div
+                                    className={`size-9 rounded-full bg-gradient-to-br from-violet-500 to-indigo-600 items-center justify-center text-white text-sm font-medium ${user?.profilePictureUrl ? 'hidden' : 'flex'}`}
+                                >
                                     {user?.fullName?.charAt(0)?.toUpperCase() || 'U'}
                                 </div>
                                 <ChevronDown className="size-4 text-muted-foreground group-hover:text-foreground transition-colors" />
