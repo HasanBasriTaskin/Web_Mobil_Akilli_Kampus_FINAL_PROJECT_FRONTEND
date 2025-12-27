@@ -23,7 +23,11 @@ import {
     UtensilsCrossed,
     Wallet,
     QrCode,
-    PartyPopper
+    PartyPopper,
+    BarChart3,
+    Activity,
+    Cpu,
+    Clock
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth.store';
@@ -60,6 +64,37 @@ const navItems = [
         title: 'Yemek Yönetimi',
         href: '/admin/meals',
         icon: UtensilsCrossed,
+        roles: ['Admin']
+    },
+    // Admin Analytics - Part 4
+    {
+        title: 'Admin Dashboard',
+        href: '/admin/dashboard',
+        icon: BarChart3,
+        roles: ['Admin']
+    },
+    {
+        title: 'Akademik Analiz',
+        href: '/admin/analytics/academic',
+        icon: GraduationCap,
+        roles: ['Admin']
+    },
+    {
+        title: 'Devamsızlık Analizi',
+        href: '/admin/analytics/attendance',
+        icon: Clock,
+        roles: ['Admin']
+    },
+    {
+        title: 'Yemek Analizi',
+        href: '/admin/analytics/meal',
+        icon: UtensilsCrossed,
+        roles: ['Admin']
+    },
+    {
+        title: 'IoT Sensörler',
+        href: '/admin/iot',
+        icon: Cpu,
         roles: ['Admin']
     },
     // Academic Management
@@ -196,6 +231,12 @@ const navItems = [
     {
         title: 'Bildirimler',
         href: '/notifications',
+        icon: Bell,
+        roles: ['Student', 'Faculty', 'Admin']
+    },
+    {
+        title: 'Bildirim Ayarları',
+        href: '/settings/notifications',
         icon: Bell,
         roles: ['Student', 'Faculty', 'Admin']
     },

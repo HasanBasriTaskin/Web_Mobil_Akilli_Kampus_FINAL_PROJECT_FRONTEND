@@ -7,20 +7,20 @@ import { get, post, put, del } from './api-client';
 
 /**
  * Ders listesi
- * @param {object} params - { page, limit, search, departmentId }
+ * @param {object} params - { page, pageSize, search, departmentId }
  * @returns {Promise<object>} Ders listesi
  */
 export async function getCourses(params = {}) {
     const queryParams = new URLSearchParams();
-    
+
     if (params.page) queryParams.append('page', params.page);
-    if (params.limit) queryParams.append('limit', params.limit);
+    if (params.pageSize) queryParams.append('pageSize', params.pageSize);
     if (params.search) queryParams.append('search', params.search);
     if (params.departmentId) queryParams.append('departmentId', params.departmentId);
 
     const queryString = queryParams.toString();
     const endpoint = `/courses${queryString ? `?${queryString}` : ''}`;
-    
+
     return get(endpoint);
 }
 
@@ -68,7 +68,7 @@ export async function deleteCourse(courseId) {
  */
 export async function getSections(params = {}) {
     const queryParams = new URLSearchParams();
-    
+
     if (params.semester) queryParams.append('semester', params.semester);
     if (params.year) queryParams.append('year', params.year);
     if (params.instructorId) queryParams.append('instructorId', params.instructorId);
@@ -76,7 +76,7 @@ export async function getSections(params = {}) {
 
     const queryString = queryParams.toString();
     const endpoint = `/sections${queryString ? `?${queryString}` : ''}`;
-    
+
     return get(endpoint);
 }
 
