@@ -64,10 +64,18 @@ export async function getMySchedule(semester = null, year = null) {
     return get(`/enrollments/my-schedule${query}`);
 }
 
+/**
+ * Akademisyenin kendi sectionlarını getir
+ */
+export async function getMySections() {
+    return get('/enrollments/my-sections');
+}
+
 export default {
     enrollInCourse,
     dropCourse,
     getMyCourses,
+    getMySections,
     checkPrerequisites,
     checkScheduleConflict,
     getStudentsBySection,

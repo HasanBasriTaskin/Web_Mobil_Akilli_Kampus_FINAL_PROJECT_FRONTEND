@@ -3,7 +3,7 @@
  */
 
 // Backend base URL (statik dosyalar için)
-const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'https://localhost:7123';
+const BACKEND_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:5150';
 
 /**
  * Relative URL'leri absolute URL'e çevirir

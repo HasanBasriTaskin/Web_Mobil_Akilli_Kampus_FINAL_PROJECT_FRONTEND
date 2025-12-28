@@ -2,18 +2,18 @@
 
 import { useState, useRef, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-    QrCode, 
-    Scan, 
-    CheckCircle, 
-    XCircle, 
-    User, 
-    GraduationCap, 
+import {
+    QrCode,
+    Scan,
+    CheckCircle,
+    XCircle,
+    User,
+    GraduationCap,
     UtensilsCrossed,
     Loader2,
     Camera
 } from 'lucide-react';
-import { validateQRCode, useReservation } from '@/services/meal.service';
+import { scanQRCode, useReservation } from '@/services/meal.service';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -45,7 +45,7 @@ export default function QRScannerPage() {
 
     async function handleScan() {
         const code = qrInput.trim();
-        
+
         if (!code) {
             toast.error('Lütfen QR kod veya öğrenci numarası giriniz');
             return;
@@ -55,9 +55,9 @@ export default function QRScannerPage() {
             setValidating(true);
             setError(null);
             setScanResult(null);
-            
+
             // QR kod veya Student ID ile doğrula
-            const response = await validateQRCode(code);
+            const response = await scanQRCode(code);
             setScanResult(response.data);
             toast.success('QR kod doğrulandı');
         } catch (error) {
@@ -79,7 +79,7 @@ export default function QRScannerPage() {
             // Dokümantasyona göre: POST /api/v1/meals/reservations/:id/use
             const reservationId = scanResult.reservation.id;
             const qrCode = scanResult.reservation.qrCode;
-            
+
             await useReservation(reservationId, qrCode);
             toast.success('Rezervasyon başarıyla kullanıldı');
             setScanResult(null);
@@ -134,7 +134,7 @@ export default function QRScannerPage() {
                         <div className="p-4 border-b border-border">
                             <h2 className="font-semibold">QR Kod Tarayıcı</h2>
                         </div>
-                        
+
                         {/* Camera View Placeholder */}
                         <div className="relative bg-slate-900 aspect-video flex items-center justify-center">
                             <div className="absolute inset-0 bg-gradient-to-br from-slate-800 to-slate-900">
@@ -142,7 +142,7 @@ export default function QRScannerPage() {
                                     <QrCode className="size-32 text-slate-700" />
                                 </div>
                             </div>
-                            
+
                             {/* QR Frame Overlay */}
                             <div className="relative z-10 w-64 h-64 border-4 border-blue-500 rounded-lg">
                                 <div className="absolute -top-1 -left-1 w-6 h-6 border-t-4 border-l-4 border-blue-500 rounded-tl-lg" />
@@ -150,13 +150,13 @@ export default function QRScannerPage() {
                                 <div className="absolute -bottom-1 -left-1 w-6 h-6 border-b-4 border-l-4 border-blue-500 rounded-bl-lg" />
                                 <div className="absolute -bottom-1 -right-1 w-6 h-6 border-b-4 border-r-4 border-blue-500 rounded-br-lg" />
                             </div>
-                            
+
                             {/* Instruction */}
                             <div className="absolute bottom-0 left-0 right-0 bg-black/70 text-white p-4 text-center">
                                 <p className="text-sm">QR kodu çerçeveye hizalayın</p>
                             </div>
                         </div>
-                        
+
                         {/* Camera Status */}
                         <div className="p-4 bg-muted/30 flex items-center gap-2 text-sm text-muted-foreground">
                             <Camera className="size-4 text-green-600" />
@@ -245,21 +245,18 @@ export default function QRScannerPage() {
                                 </div>
 
                                 {/* Meal Type - Dokümantasyona göre */}
-                                <div className={`flex items-center gap-3 p-4 rounded-lg mb-6 ${
-                                    reservation.mealType === 'lunch' 
-                                        ? 'bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800' 
-                                        : 'bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800'
-                                }`}>
-                                    <UtensilsCrossed className={`size-5 ${
-                                        reservation.mealType === 'lunch' ? 'text-blue-600' : 'text-purple-600'
-                                    }`} />
+                                <div className={`flex items-center gap-3 p-4 rounded-lg mb-6 ${reservation.mealType === 'lunch'
+                                    ? 'bg-blue-50 dark:bg-blue-950/20 border border-blue-200 dark:border-blue-800'
+                                    : 'bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800'
+                                    }`}>
+                                    <UtensilsCrossed className={`size-5 ${reservation.mealType === 'lunch' ? 'text-blue-600' : 'text-purple-600'
+                                        }`} />
                                     <div className="flex-1">
                                         <p className="text-xs text-muted-foreground">Yemek Tipi</p>
-                                        <p className={`font-semibold ${
-                                            reservation.mealType === 'lunch' 
-                                                ? 'text-blue-700 dark:text-blue-400' 
-                                                : 'text-purple-700 dark:text-purple-400'
-                                        }`}>
+                                        <p className={`font-semibold ${reservation.mealType === 'lunch'
+                                            ? 'text-blue-700 dark:text-blue-400'
+                                            : 'text-purple-700 dark:text-purple-400'
+                                            }`}>
                                             {reservation.mealType === 'lunch' ? 'Öğle Yemeği' : 'Akşam Yemeği'}
                                         </p>
                                     </div>

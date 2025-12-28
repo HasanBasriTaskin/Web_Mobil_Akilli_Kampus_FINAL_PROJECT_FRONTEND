@@ -46,9 +46,18 @@ export function ProfilePictureUpload({ currentPicture, onUploadSuccess }) {
         setIsUploading(true);
         try {
             const response = await uploadProfilePicture(file);
-            if (response.success) {
+            // Backend Response<string> formatı: { isSuccessful: true, data: "/uploads/..." }
+            const isSuccess = response.success || response.isSuccessful;
+            // data direkt URL string'i olabilir veya profilePictureUrl içinde olabilir
+            const pictureUrl = typeof response.data === 'string'
+                ? response.data
+                : response.data?.profilePictureUrl || response.data;
+
+            if (isSuccess && pictureUrl) {
                 toast.success('Profil fotoğrafı güncellendi');
-                onUploadSuccess?.(response.data?.profilePictureUrl);
+                onUploadSuccess?.(pictureUrl);
+            } else {
+                toast.error('Fotoğraf yüklenemedi');
             }
         } catch (error) {
             toast.error('Fotoğraf yüklenemedi', {
@@ -67,15 +76,22 @@ export function ProfilePictureUpload({ currentPicture, onUploadSuccess }) {
         }
     };
 
+    const handleRemovePicture = () => {
+        clearPreview();
+        // Mevcut resmi de kaldır
+        onUploadSuccess?.(null);
+    };
+
     // Önizleme varsa onu kullan, yoksa backend URL'i ile birleştir
     const displayImage = preview || getProfilePictureUrl(currentPicture);
+    const hasImage = displayImage && displayImage !== 'null' && displayImage !== 'undefined';
 
     return (
         <div className="flex flex-col items-center gap-4">
             {/* Avatar */}
             <div className="relative group">
                 <div className="size-32 rounded-full overflow-hidden bg-gradient-to-br from-violet-500 to-indigo-600 flex items-center justify-center text-white text-4xl font-bold shadow-xl">
-                    {displayImage ? (
+                    {hasImage ? (
                         <img
                             src={displayImage}
                             alt="Profil"
@@ -99,11 +115,12 @@ export function ProfilePictureUpload({ currentPicture, onUploadSuccess }) {
                     )}
                 </button>
 
-                {/* Clear preview button */}
-                {preview && !isUploading && (
+                {/* Remove picture button */}
+                {hasImage && !isUploading && (
                     <button
-                        onClick={clearPreview}
-                        className="absolute -top-1 -right-1 p-1 rounded-full bg-red-500 text-white shadow-lg hover:bg-red-600 transition-colors"
+                        onClick={handleRemovePicture}
+                        className="absolute -top-1 -right-1 p-1.5 rounded-full bg-red-500 text-white shadow-lg hover:bg-red-600 transition-colors z-10"
+                        title="Fotoğrafı kaldır"
                     >
                         <X className="size-4" />
                     </button>

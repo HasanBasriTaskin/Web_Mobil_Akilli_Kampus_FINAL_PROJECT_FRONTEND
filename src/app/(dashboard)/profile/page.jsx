@@ -14,7 +14,8 @@ import {
     Hash,
     Briefcase,
     Calendar,
-    Save
+    Save,
+    GraduationCap
 } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -172,10 +173,18 @@ export default function ProfilePage() {
                                 <span className="text-muted-foreground">{user.role}</span>
                             </div>
                             {user.student && (
-                                <div className="flex items-center gap-3 text-sm">
-                                    <Hash className="size-4 text-muted-foreground" />
-                                    <span className="text-muted-foreground">{user.student.studentNumber}</span>
-                                </div>
+                                <>
+                                    <div className="flex items-center gap-3 text-sm">
+                                        <Hash className="size-4 text-muted-foreground" />
+                                        <span className="text-muted-foreground">{user.student.studentNumber}</span>
+                                    </div>
+                                    {user.student.departmentName && (
+                                        <div className="flex items-center gap-3 text-sm">
+                                            <GraduationCap className="size-4 text-muted-foreground" />
+                                            <span className="text-muted-foreground">{user.student.departmentName}</span>
+                                        </div>
+                                    )}
+                                </>
                             )}
                             {user.faculty && (
                                 <div className="flex items-center gap-3 text-sm">
