@@ -97,6 +97,12 @@ const navItems = [
         icon: Cpu,
         roles: ['Admin']
     },
+    {
+        title: 'Akademisyen Talepleri',
+        href: '/admin/faculty-requests',
+        icon: Users,
+        roles: ['Admin']
+    },
     // Academic Management
     {
         title: 'Ders Kataloğu',
@@ -147,6 +153,13 @@ const navItems = [
         title: 'Kayıt Talepleri',
         href: '/enrollment-requests',
         icon: Users,
+        roles: ['Faculty']
+    },
+    // Take Course - Faculty
+    {
+        title: 'Ders Al',
+        href: '/take-course',
+        icon: GraduationCap,
         roles: ['Faculty']
     },
     // Grades - Faculty
