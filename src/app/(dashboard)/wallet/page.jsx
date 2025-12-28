@@ -2,13 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { 
-    Wallet, 
-    Plus, 
-    ArrowDown, 
-    ArrowUp, 
-    CreditCard, 
-    Building2, 
+import {
+    Wallet,
+    Plus,
+    ArrowDown,
+    ArrowUp,
+    CreditCard,
+    Building2,
     Smartphone,
     X,
     ChevronLeft,
@@ -21,7 +21,7 @@ import {
     ShoppingBag,
     AlertCircle
 } from 'lucide-react';
-import { getBalance, addMoney, getTransactions } from '@/services/wallet.service';
+import { getBalance, addMoneyWithIyzico, getTransactions } from '@/services/wallet.service';
 import { toast } from 'sonner';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -89,7 +89,7 @@ function AddMoneyModal({ isOpen, onClose, onSuccess }) {
 
     async function handleSubmit(e) {
         e.preventDefault();
-        
+
         const amountNum = parseFloat(amount);
         if (!amountNum || amountNum <= 0) {
             toast.error('Geçerli bir tutar giriniz');
@@ -108,24 +108,18 @@ function AddMoneyModal({ isOpen, onClose, onSuccess }) {
 
         try {
             setLoading(true);
-            const response = await addMoney({
-                amount: amountNum,
-                paymentMethod
+            const response = await addMoneyWithIyzico({
+                amount: amountNum
             });
 
-            // Simüle edilmiş ödeme gateway yönlendirmesi
-            toast.success('Ödeme sayfasına yönlendiriliyorsunuz...');
-            
-            // Gerçek uygulamada burada payment gateway'e yönlendirme yapılır
-            // window.location.href = response.data.redirectUrl;
-            
-            // Simülasyon için direkt başarılı sayıyoruz
-            setTimeout(() => {
-                toast.success('Para yükleme başarılı!');
-                onSuccess?.();
-                onClose();
-                setAmount('');
-            }, 2000);
+            // Iyzico ödeme sayfasına yönlendir
+            if (response.data?.paymentPageUrl) {
+                toast.success('Ödeme sayfasına yönlendiriliyorsunuz...');
+                // Iyzico sayfasına yönlendir
+                window.location.href = response.data.paymentPageUrl;
+            } else {
+                toast.error('Ödeme sayfası oluşturulamadı');
+            }
         } catch (error) {
             toast.error(error.message || 'Para yükleme başlatılamadı');
         } finally {
@@ -195,22 +189,19 @@ function AddMoneyModal({ isOpen, onClose, onSuccess }) {
                                             key={method.value}
                                             type="button"
                                             onClick={() => setPaymentMethod(method.value)}
-                                            className={`p-3 rounded-lg border-2 transition-all ${
-                                                isSelected
+                                            className={`p-3 rounded-lg border-2 transition-all ${isSelected
                                                     ? 'border-purple-500 bg-purple-50 dark:bg-purple-950/20 shadow-md'
                                                     : 'border-border hover:border-purple-400 hover:bg-purple-50/50 dark:hover:bg-purple-950/10 hover:shadow-md'
-                                            }`}
+                                                }`}
                                         >
-                                            <Icon className={`size-5 mx-auto mb-1 transition-colors ${
-                                                isSelected 
-                                                    ? 'text-purple-600 dark:text-purple-400' 
+                                            <Icon className={`size-5 mx-auto mb-1 transition-colors ${isSelected
+                                                    ? 'text-purple-600 dark:text-purple-400'
                                                     : 'text-muted-foreground hover:text-purple-600 dark:hover:text-purple-400'
-                                            }`} />
-                                            <p className={`text-xs font-medium transition-colors ${
-                                                isSelected 
-                                                    ? 'text-purple-600 dark:text-purple-400' 
+                                                }`} />
+                                            <p className={`text-xs font-medium transition-colors ${isSelected
+                                                    ? 'text-purple-600 dark:text-purple-400'
                                                     : 'text-muted-foreground hover:text-purple-600 dark:hover:text-purple-400'
-                                            }`}>
+                                                }`}>
                                                 {method.label}
                                             </p>
                                         </button>
@@ -329,8 +320,8 @@ export default function WalletPage() {
         if (status === 'failed') {
             return 'text-gray-500';
         }
-        return type === 'deposit' 
-            ? 'text-green-600 dark:text-green-400' 
+        return type === 'deposit'
+            ? 'text-green-600 dark:text-green-400'
             : 'text-red-600 dark:text-red-400';
     }
 
@@ -369,7 +360,7 @@ export default function WalletPage() {
                         ease: "easeInOut"
                     }}
                 />
-                
+
                 {/* Subtle Gradient Layer for Depth */}
                 <motion.div
                     className="absolute inset-0 opacity-30"
@@ -460,7 +451,7 @@ export default function WalletPage() {
                                         return (
                                             <tr key={transaction.id} className="border-t border-border hover:bg-muted/30 transition-colors">
                                                 <td className="p-4 text-sm">
-                                                    {formatDate(transaction.createdAt)}
+                                                    {formatDate(transaction.transactionDate)}
                                                 </td>
                                                 <td className="p-4">
                                                     <div className="flex items-center gap-3">
@@ -474,10 +465,10 @@ export default function WalletPage() {
                                                     {transaction.category || '-'}
                                                 </td>
                                                 <td className={`p-4 text-sm font-medium text-right ${color}`}>
-                                                    {transaction.status === 'failed' 
+                                                    {transaction.status === 'failed'
                                                         ? formatCurrency(0)
-                                                        : transaction.amount > 0 
-                                                            ? `+${formatCurrency(transaction.amount)}` 
+                                                        : transaction.amount > 0
+                                                            ? `+${formatCurrency(transaction.amount)}`
                                                             : formatCurrency(transaction.amount)}
                                                 </td>
                                                 <td className="p-4 text-center">

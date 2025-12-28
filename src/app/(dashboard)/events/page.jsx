@@ -3,11 +3,11 @@
 import { useState, useEffect } from 'react';
 import { motion } from 'framer-motion';
 import { useRouter } from 'next/navigation';
-import { 
-    Calendar, 
-    MapPin, 
-    Clock, 
-    Users, 
+import {
+    Calendar,
+    MapPin,
+    Clock,
+    Users,
     Search,
     X,
     GraduationCap,
@@ -57,12 +57,30 @@ export default function EventsPage() {
             if (searchQuery.trim()) {
                 params.search = searchQuery.trim();
             }
-            
+
             const response = await getEvents(params);
-            setEvents(response.data || []);
+            // API response formats:
+            // 1. { data: { data: [...], pageNumber, totalRecords } } - PagedResponse inside Response wrapper
+            // 2. { data: [...] } - Array inside Response wrapper
+            // 3. [...] - Direct array
+            let eventsData = [];
+            if (Array.isArray(response)) {
+                eventsData = response;
+            } else if (response?.data) {
+                // Check if it's PagedResponse (has nested data property)
+                if (response.data?.data && Array.isArray(response.data.data)) {
+                    eventsData = response.data.data;
+                } else if (Array.isArray(response.data)) {
+                    eventsData = response.data;
+                } else if (response.data?.items) {
+                    eventsData = response.data.items;
+                }
+            }
+            setEvents(eventsData);
         } catch (error) {
             toast.error('Etkinlikler yüklenemedi');
             console.error(error);
+            setEvents([]);
         } finally {
             setLoading(false);
         }
@@ -177,11 +195,10 @@ export default function EventsPage() {
                             <button
                                 key={category.value}
                                 onClick={() => setSelectedCategory(category.value)}
-                                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${
-                                    isSelected
-                                        ? 'bg-purple-600 text-white shadow-md'
-                                        : 'bg-muted text-muted-foreground hover:bg-muted/80'
-                                }`}
+                                className={`flex items-center gap-2 px-4 py-2 rounded-lg font-medium transition-all ${isSelected
+                                    ? 'bg-purple-600 text-white shadow-md'
+                                    : 'bg-muted text-muted-foreground hover:bg-muted/80'
+                                    }`}
                             >
                                 <Icon className="size-4" />
                                 {category.label}
@@ -276,13 +293,12 @@ export default function EventsPage() {
                             </div>
 
                             {/* View Details Hint */}
-                            <div className={`text-sm font-medium mt-4 group-hover:underline ${
-                                event.category === 'conference' ? 'text-blue-600 dark:text-blue-400' :
+                            <div className={`text-sm font-medium mt-4 group-hover:underline ${event.category === 'conference' ? 'text-blue-600 dark:text-blue-400' :
                                 event.category === 'workshop' ? 'text-purple-600 dark:text-purple-400' :
-                                event.category === 'social' ? 'text-pink-600 dark:text-pink-400' :
-                                event.category === 'sports' ? 'text-green-600 dark:text-green-400' :
-                                'text-purple-600 dark:text-purple-400'
-                            }`}>
+                                    event.category === 'social' ? 'text-pink-600 dark:text-pink-400' :
+                                        event.category === 'sports' ? 'text-green-600 dark:text-green-400' :
+                                            'text-purple-600 dark:text-purple-400'
+                                }`}>
                                 Detayları Gör →
                             </div>
                         </motion.div>

@@ -103,6 +103,12 @@ const navItems = [
         icon: Users,
         roles: ['Admin']
     },
+    {
+        title: 'Etkinlik Yönetimi',
+        href: '/admin/events',
+        icon: Calendar,
+        roles: ['Admin']
+    },
     // Academic Management
     {
         title: 'Ders Kataloğu',
