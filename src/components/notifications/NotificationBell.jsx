@@ -273,7 +273,16 @@ export function NotificationBell() {
                                             key={notification.id}
                                             className={`p-4 border-b border-border last:border-b-0 hover:bg-muted/50 transition-colors cursor-pointer ${!notification.isRead ? 'bg-primary/5' : ''
                                                 }`}
-                                            onClick={() => router.push('/notifications')}
+                                            onClick={() => {
+                                                setIsOpen(false);
+                                                handleMarkAsRead(notification.id, { stopPropagation: () => { } });
+
+                                                if (notification.relatedEntityType === 'AttendanceSession' && notification.relatedEntityId) {
+                                                    router.push(`/attendance/give/${notification.relatedEntityId}`);
+                                                } else {
+                                                    router.push('/notifications');
+                                                }
+                                            }}
                                         >
                                             <div className="flex gap-3">
                                                 <div className={`p-2 rounded-lg bg-muted ${typeColor}`}>

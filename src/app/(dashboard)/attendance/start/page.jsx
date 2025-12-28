@@ -7,6 +7,7 @@ import {
     Copy, CheckCircle, AlertCircle
 } from 'lucide-react';
 import { getMySessions, createSession, closeSession } from '@/services/attendance.service';
+import { getMySections } from '@/services/enrollment.service';
 import { toast } from 'sonner';
 
 /**
@@ -121,12 +122,16 @@ export default function StartAttendancePage() {
             const active = sessions.find(s => s.status === 'Open' || s.status === 0);
             setActiveSession(active || null);
 
-            // Mock sections - in real app, fetch from API
-            setSections([
-                { id: 1, name: 'CS101 - Introduction to Programming', sectionNumber: '01' },
-                { id: 2, name: 'CS201 - Data Structures', sectionNumber: '01' },
-                { id: 3, name: 'CS301 - Algorithms', sectionNumber: '01' }
-            ]);
+            // Fetch faculty's sections
+            const sectionsResponse = await getMySections();
+            if (sectionsResponse.success) {
+                const mappedSections = (sectionsResponse.data || []).map(s => ({
+                    id: s.id,
+                    name: `${s.courseCode} - ${s.courseName}`,
+                    sectionNumber: s.sectionNumber
+                }));
+                setSections(mappedSections);
+            }
         } catch (error) {
             console.error(error);
         }
@@ -168,14 +173,17 @@ export default function StartAttendancePage() {
 
         setLoading(true);
         try {
-            const startTime = new Date().toISOString();
-            const endTime = new Date(Date.now() + duration * 60 * 1000).toISOString();
+            const now = new Date();
+            const end = new Date(now.getTime() + duration * 60000);
+
+            // Format time as HH:mm:ss for backend TimeSpan
+            const formatTime = (d) => d.toTimeString().split(' ')[0];
 
             const response = await createSession({
                 sectionId: parseInt(selectedSection),
-                date: new Date().toISOString().split('T')[0],
-                startTime,
-                endTime,
+                date: now.toISOString().split('T')[0],
+                startTime: formatTime(now),
+                endTime: formatTime(end),
                 latitude: location.latitude,
                 longitude: location.longitude,
                 geofenceRadius
@@ -215,13 +223,13 @@ export default function StartAttendancePage() {
 
                         {/* Section Select */}
                         <div>
-                            <label className="block text-sm font-medium mb-2">Seksiyon</label>
+                            <label className="block text-sm font-medium mb-2">Ders Seçin</label>
                             <select
                                 value={selectedSection}
                                 onChange={(e) => setSelectedSection(e.target.value)}
                                 className="w-full px-4 py-3 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
                             >
-                                <option value="">Seksiyon seçin...</option>
+                                <option value="">Ders seçin...</option>
                                 {sections.map(s => (
                                     <option key={s.id} value={s.id}>
                                         {s.name} - Seksiyon {s.sectionNumber}
