@@ -14,7 +14,7 @@ export async function getBalance() {
 }
 
 /**
- * Para yükleme işlemi başlat
+ * Para yükleme işlemi başlat (Mock - Test için)
  * Backend: POST /api/v1/wallet/topup
  * @param {object} data - { amount, paymentMethod }
  */
@@ -26,6 +26,22 @@ export async function addMoney(data) {
         CardNumber: data.cardNumber || '1234567812345678', // Backend test kartı
         CVV: data.cvv || '123',
         ExpiryDate: data.expiryDate || '01/26' // MM/YY format
+    });
+}
+
+/**
+ * Iyzico ile para yükleme işlemi başlat (Gerçek Ödeme)
+ * Backend: POST /api/v1/wallet/topup/iyzico
+ * @param {object} data - { amount }
+ * @returns {Promise} - { paymentPageUrl, htmlContent, conversationId }
+ */
+export async function addMoneyWithIyzico(data) {
+    return post('/wallet/topup/iyzico', {
+        Amount: data.amount,
+        GsmNumber: data.gsmNumber || '+905000000000',
+        Address: data.address || 'Kampüs',
+        City: data.city || 'Istanbul',
+        Country: data.country || 'Turkey'
     });
 }
 
@@ -46,7 +62,6 @@ export async function getTransactions(params = {}) {
 export default {
     getBalance,
     addMoney,
+    addMoneyWithIyzico,
     getTransactions
 };
-
-
