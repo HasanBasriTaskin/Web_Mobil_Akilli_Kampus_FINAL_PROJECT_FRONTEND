@@ -51,11 +51,33 @@ export async function getStudentsBySection(sectionId) {
     return get(`/enrollments/sections/${sectionId}/students`);
 }
 
+/**
+ * Kişisel ders programını getir
+ * @param {string} semester - Opsiyonel dönem filtresi
+ * @param {number} year - Opsiyonel yıl filtresi
+ */
+export async function getMySchedule(semester = null, year = null) {
+    const params = new URLSearchParams();
+    if (semester) params.append('semester', semester);
+    if (year) params.append('year', year);
+    const query = params.toString() ? `?${params.toString()}` : '';
+    return get(`/enrollments/my-schedule${query}`);
+}
+
+/**
+ * Akademisyenin kendi sectionlarını getir
+ */
+export async function getMySections() {
+    return get('/enrollments/my-sections');
+}
+
 export default {
     enrollInCourse,
     dropCourse,
     getMyCourses,
+    getMySections,
     checkPrerequisites,
     checkScheduleConflict,
-    getStudentsBySection
+    getStudentsBySection,
+    getMySchedule
 };
