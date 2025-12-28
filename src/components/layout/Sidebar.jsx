@@ -19,7 +19,15 @@ import {
     ClipboardCheck,
     MapPin,
     FileCheck,
-    NotebookPen
+    NotebookPen,
+    UtensilsCrossed,
+    Wallet,
+    QrCode,
+    PartyPopper,
+    BarChart3,
+    Activity,
+    Cpu,
+    Clock
 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useAuthStore } from '@/stores/auth.store';
@@ -46,6 +54,55 @@ const navItems = [
         icon: Users,
         roles: ['Admin']
     },
+    {
+        title: 'Program Oluşturma',
+        href: '/admin/scheduling/generate',
+        icon: Calendar,
+        roles: ['Admin']
+    },
+    {
+        title: 'Yemek Yönetimi',
+        href: '/admin/meals',
+        icon: UtensilsCrossed,
+        roles: ['Admin']
+    },
+    // Admin Analytics - Part 4
+    {
+        title: 'Admin Dashboard',
+        href: '/admin/dashboard',
+        icon: BarChart3,
+        roles: ['Admin']
+    },
+    {
+        title: 'Akademik Analiz',
+        href: '/admin/analytics/academic',
+        icon: GraduationCap,
+        roles: ['Admin']
+    },
+    {
+        title: 'Devamsızlık Analizi',
+        href: '/admin/analytics/attendance',
+        icon: Clock,
+        roles: ['Admin']
+    },
+    {
+        title: 'Yemek Analizi',
+        href: '/admin/analytics/meal',
+        icon: UtensilsCrossed,
+        roles: ['Admin']
+    },
+    {
+        title: 'IoT Sensörler',
+        href: '/admin/iot',
+        icon: Cpu,
+        roles: ['Admin']
+    },
+    {
+        title: 'Akademisyen Talepleri',
+        href: '/admin/faculty-requests',
+        icon: Users,
+        roles: ['Admin']
+    },
     // Academic Management
     {
         title: 'Ders Kataloğu',
@@ -57,6 +114,12 @@ const navItems = [
         title: 'Kayıtlı Derslerim',
         href: '/my-courses',
         icon: GraduationCap,
+        roles: ['Student']
+    },
+    {
+        title: 'Ders Programım',
+        href: '/schedule',
+        icon: Calendar,
         roles: ['Student']
     },
     {
@@ -92,6 +155,13 @@ const navItems = [
         icon: Users,
         roles: ['Faculty']
     },
+    // Take Course - Faculty
+    {
+        title: 'Ders Al',
+        href: '/take-course',
+        icon: GraduationCap,
+        roles: ['Faculty']
+    },
     // Grades - Faculty
     {
         title: 'Not Girişi',
@@ -105,6 +175,58 @@ const navItems = [
         href: '/excuse-requests',
         icon: FileCheck,
         roles: ['Faculty', 'Student']
+    },
+    // Classroom Reservations
+    {
+        title: 'Derslik Rezervasyonları',
+        href: '/reservations',
+        icon: Calendar,
+        roles: ['Student', 'Faculty', 'Admin']
+    },
+    // Meal Service
+    {
+        title: 'Yemek Menüsü',
+        href: '/meals/menu',
+        icon: UtensilsCrossed,
+        roles: ['Student', 'Faculty', 'Admin']
+    },
+    {
+        title: 'Rezervasyonlarım',
+        href: '/meals/reservations',
+        icon: Calendar,
+        roles: ['Student', 'Faculty', 'Admin']
+    },
+    {
+        title: 'QR Kod Tarayıcı',
+        href: '/meals/scan',
+        icon: QrCode,
+        roles: ['Faculty', 'Admin']
+    },
+    // Wallet
+    {
+        title: 'Cüzdan',
+        href: '/wallet',
+        icon: Wallet,
+        roles: ['Student', 'Faculty', 'Admin']
+    },
+    // Event Management
+    {
+        title: 'Etkinlikler',
+        href: '/events',
+        icon: PartyPopper,
+        roles: ['Student', 'Faculty', 'Admin']
+    },
+    {
+        title: 'Etkinliklerim',
+        href: '/my-events',
+        icon: Calendar,
+        roles: ['Student', 'Faculty', 'Admin']
+    },
+    {
+        title: 'Etkinlik Check-in',
+        href: '/events/checkin',
+        icon: QrCode,
+        roles: ['Faculty', 'Admin']
     },
     // Others
     {
@@ -122,6 +244,12 @@ const navItems = [
     {
         title: 'Bildirimler',
         href: '/notifications',
+        icon: Bell,
+        roles: ['Student', 'Faculty', 'Admin']
+    },
+    {
+        title: 'Bildirim Ayarları',
+        href: '/settings/notifications',
         icon: Bell,
         roles: ['Student', 'Faculty', 'Admin']
     },

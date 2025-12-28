@@ -26,9 +26,7 @@ const customJestConfig = {
     '!src/components/profile/**',
     '!src/**/*.d.ts',
     '!src/**/layout.{js,jsx}',
-    '!src/**/page.{js,jsx}',
-    '!src/app/layout.js',
-    '!src/app/page.js'
+    '!src/app/layout.js'
   ],
   coverageDirectory: 'coverage',
   coverageReporters: ['text', 'lcov'],

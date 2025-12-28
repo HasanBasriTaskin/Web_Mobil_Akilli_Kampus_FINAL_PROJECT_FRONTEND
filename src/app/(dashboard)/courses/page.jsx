@@ -50,7 +50,9 @@ export default function CoursesPage() {
     async function loadCourses() {
         try {
             setLoading(true);
-            const params = {};
+            const params = {
+                pageSize: 100, // Tüm dersleri al
+            };
             if (searchTerm) params.search = searchTerm;
             if (departmentFilter) params.departmentId = departmentFilter;
 
@@ -101,10 +103,11 @@ export default function CoursesPage() {
         loadCourses();
     }
 
-    // Pagination
-    const totalPages = Math.ceil(courses.length / itemsPerPage);
-    const startIndex = (currentPage - 1) * itemsPerPage;
-    const endIndex = startIndex + itemsPerPage;
+    // Pagination - Tüm Bölümler seçiliyken (departmentFilter boş) tüm dersler gösterilir
+    const showAllCourses = !departmentFilter && !searchTerm;
+    const totalPages = showAllCourses ? 1 : Math.ceil(courses.length / itemsPerPage);
+    const startIndex = showAllCourses ? 0 : (currentPage - 1) * itemsPerPage;
+    const endIndex = showAllCourses ? courses.length : startIndex + itemsPerPage;
     const paginatedCourses = courses.slice(startIndex, endIndex);
 
     return (
