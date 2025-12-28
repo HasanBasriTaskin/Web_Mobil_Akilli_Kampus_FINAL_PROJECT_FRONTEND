@@ -9,8 +9,7 @@ import { toast } from 'sonner';
 
 import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/stores/auth.store';
-import { getSections } from '@/services/academic.service';
-import { mockSections } from '@/mocks/academic.mock';
+import { getMySections } from '@/services/enrollment.service';
 
 /**
  * Gradebook List Page
@@ -33,22 +32,30 @@ export default function GradebookListPage() {
     async function loadSections() {
         try {
             setLoading(true);
-            const response = await getSections();
-            
+            const response = await getMySections();
+
             if (response.success) {
-                // Sadece bu öğretim üyesinin section'larını göster
-                const mySections = (response.data?.items || response.data || []).filter(
-                    section => section.instructor?.id === user?.id || user?.role === 'Admin'
-                );
-                setSections(mySections);
+                // Map backend response to frontend format
+                const mappedSections = (response.data || []).map(s => ({
+                    id: s.id,
+                    sectionNumber: s.sectionNumber,
+                    enrolledCount: s.enrolledCount || 0,
+                    course: {
+                        code: s.courseCode,
+                        name: s.courseName
+                    },
+                    schedule: s.schedule ? {
+                        day: s.schedule.dayOfWeek,
+                        time: `${s.schedule.startTime}-${s.schedule.endTime}`
+                    } : null
+                }));
+                setSections(mappedSections);
             } else {
-                // Mock data fallback
-                setSections(mockSections);
+                setSections([]);
             }
         } catch (error) {
-            // Mock data fallback
-            console.error('Section\'lar yüklenemedi, mock data kullanılıyor:', error);
-            setSections(mockSections);
+            console.error('Section\'lar yüklenemedi:', error);
+            setSections([]);
         } finally {
             setLoading(false);
         }
@@ -98,7 +105,7 @@ export default function GradebookListPage() {
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                     {sections.map((section, index) => {
                         const course = section.course;
-                        
+
                         return (
                             <motion.div
                                 key={section.id}

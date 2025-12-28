@@ -140,7 +140,7 @@ export async function getMyCourses() {
  * @returns {Promise<object>} Öğrenci listesi
  */
 export async function getSectionStudents(sectionId) {
-    return get(`/enrollments/students/${sectionId}`);
+    return get(`/enrollments/sections/${sectionId}/students`);
 }
 
 /**

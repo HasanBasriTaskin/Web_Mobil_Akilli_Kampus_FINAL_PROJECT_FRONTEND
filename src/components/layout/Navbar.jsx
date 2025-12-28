@@ -16,6 +16,7 @@ import { Button } from '@/components/ui/button';
 import { useAuthStore } from '@/stores/auth.store';
 import { logout } from '@/services/auth.service';
 import { NotificationBell } from '@/components/notifications/NotificationBell';
+import { getProfilePictureUrl } from '@/lib/url-helper';
 
 /**
  * Navbar Component
@@ -77,10 +78,7 @@ export function Navbar({ onMenuClick }) {
                             <button className="flex items-center gap-1 group">
                                 {user?.profilePictureUrl ? (
                                     <img
-                                        src={user.profilePictureUrl.startsWith('http')
-                                            ? user.profilePictureUrl
-                                            : `http://127.0.0.1:5150${user.profilePictureUrl}`
-                                        }
+                                        src={getProfilePictureUrl(user.profilePictureUrl)}
                                         alt={user.fullName || 'Profil'}
                                         className="size-9 rounded-full object-cover border-2 border-violet-500/20"
                                         onError={(e) => {
