@@ -5,7 +5,7 @@ import apiClient from './api-client';
  * Excel/PDF rapor export API'leri
  */
 
-const API_BASE_URL = 'http://127.0.0.1:5150/api/v1';
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://127.0.0.1:5150/api/v1';
 
 /**
  * Token'ı localStorage'dan alır (Zustand formatı)
