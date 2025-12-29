@@ -9,6 +9,7 @@ import {
 import { getMySessions, createSession, closeSession } from '@/services/attendance.service';
 import { getMySections } from '@/services/enrollment.service';
 import { toast } from 'sonner';
+import { QRCodeSVG } from 'qrcode.react';
 
 /**
  * QR Code Display Component
@@ -24,20 +25,27 @@ function QRCodeDisplay({ code }) {
     }
 
     return (
-        <div className="p-6 rounded-xl bg-muted/30 text-center">
-            <div className="w-48 h-48 mx-auto bg-white rounded-xl flex items-center justify-center">
-                <QrCode className="size-32 text-primary" />
+        <div className="p-6 rounded-xl bg-white/10 text-center">
+            <div className="w-52 h-52 mx-auto bg-white rounded-xl flex items-center justify-center p-2">
+                <QRCodeSVG
+                    value={code || 'NO_CODE'}
+                    size={192}
+                    level="H"
+                    includeMargin={false}
+                    bgColor="#ffffff"
+                    fgColor="#000000"
+                />
             </div>
-            <p className="mt-4 text-sm text-muted-foreground">Öğrenciler bu kodu kullanabilir:</p>
+            <p className="mt-4 text-sm text-white/80">Öğrenciler bu kodu tarayabilir:</p>
             <div className="mt-2 flex items-center justify-center gap-2">
-                <code className="px-4 py-2 rounded-lg bg-muted font-mono text-sm">
-                    {code?.slice(0, 20)}...
+                <code className="px-4 py-2 rounded-lg bg-white/20 font-mono text-xs text-white break-all max-w-[200px]">
+                    {code?.slice(0, 25)}...
                 </code>
                 <button
                     onClick={handleCopy}
-                    className="p-2 rounded-lg hover:bg-muted transition-colors"
+                    className="p-2 rounded-lg hover:bg-white/20 transition-colors"
                 >
-                    {copied ? <CheckCircle className="size-5 text-green-500" /> : <Copy className="size-5" />}
+                    {copied ? <CheckCircle className="size-5 text-green-300" /> : <Copy className="size-5 text-white" />}
                 </button>
             </div>
         </div>
