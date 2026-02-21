@@ -7,7 +7,9 @@ import {
     Copy, CheckCircle, AlertCircle
 } from 'lucide-react';
 import { getMySessions, createSession, closeSession } from '@/services/attendance.service';
+import { getMySections } from '@/services/enrollment.service';
 import { toast } from 'sonner';
+import { QRCodeSVG } from 'qrcode.react';
 
 /**
  * QR Code Display Component
@@ -23,20 +25,27 @@ function QRCodeDisplay({ code }) {
     }
 
     return (
-        <div className="p-6 rounded-xl bg-muted/30 text-center">
-            <div className="w-48 h-48 mx-auto bg-white rounded-xl flex items-center justify-center">
-                <QrCode className="size-32 text-primary" />
+        <div className="p-6 rounded-xl bg-white/10 text-center">
+            <div className="w-52 h-52 mx-auto bg-white rounded-xl flex items-center justify-center p-2">
+                <QRCodeSVG
+                    value={code || 'NO_CODE'}
+                    size={192}
+                    level="H"
+                    includeMargin={false}
+                    bgColor="#ffffff"
+                    fgColor="#000000"
+                />
             </div>
-            <p className="mt-4 text-sm text-muted-foreground">Öğrenciler bu kodu kullanabilir:</p>
+            <p className="mt-4 text-sm text-white/80">Öğrenciler bu kodu tarayabilir:</p>
             <div className="mt-2 flex items-center justify-center gap-2">
-                <code className="px-4 py-2 rounded-lg bg-muted font-mono text-sm">
-                    {code?.slice(0, 20)}...
+                <code className="px-4 py-2 rounded-lg bg-white/20 font-mono text-xs text-white break-all max-w-[200px]">
+                    {code?.slice(0, 25)}...
                 </code>
                 <button
                     onClick={handleCopy}
-                    className="p-2 rounded-lg hover:bg-muted transition-colors"
+                    className="p-2 rounded-lg hover:bg-white/20 transition-colors"
                 >
-                    {copied ? <CheckCircle className="size-5 text-green-500" /> : <Copy className="size-5" />}
+                    {copied ? <CheckCircle className="size-5 text-green-300" /> : <Copy className="size-5 text-white" />}
                 </button>
             </div>
         </div>
@@ -121,12 +130,16 @@ export default function StartAttendancePage() {
             const active = sessions.find(s => s.status === 'Open' || s.status === 0);
             setActiveSession(active || null);
 
-            // Mock sections - in real app, fetch from API
-            setSections([
-                { id: 1, name: 'CS101 - Introduction to Programming', sectionNumber: '01' },
-                { id: 2, name: 'CS201 - Data Structures', sectionNumber: '01' },
-                { id: 3, name: 'CS301 - Algorithms', sectionNumber: '01' }
-            ]);
+            // Fetch faculty's sections
+            const sectionsResponse = await getMySections();
+            if (sectionsResponse.success) {
+                const mappedSections = (sectionsResponse.data || []).map(s => ({
+                    id: s.id,
+                    name: `${s.courseCode} - ${s.courseName}`,
+                    sectionNumber: s.sectionNumber
+                }));
+                setSections(mappedSections);
+            }
         } catch (error) {
             console.error(error);
         }
@@ -168,14 +181,17 @@ export default function StartAttendancePage() {
 
         setLoading(true);
         try {
-            const startTime = new Date().toISOString();
-            const endTime = new Date(Date.now() + duration * 60 * 1000).toISOString();
+            const now = new Date();
+            const end = new Date(now.getTime() + duration * 60000);
+
+            // Format time as HH:mm:ss for backend TimeSpan
+            const formatTime = (d) => d.toTimeString().split(' ')[0];
 
             const response = await createSession({
                 sectionId: parseInt(selectedSection),
-                date: new Date().toISOString().split('T')[0],
-                startTime,
-                endTime,
+                date: now.toISOString().split('T')[0],
+                startTime: formatTime(now),
+                endTime: formatTime(end),
                 latitude: location.latitude,
                 longitude: location.longitude,
                 geofenceRadius
@@ -215,13 +231,13 @@ export default function StartAttendancePage() {
 
                         {/* Section Select */}
                         <div>
-                            <label className="block text-sm font-medium mb-2">Seksiyon</label>
+                            <label className="block text-sm font-medium mb-2">Ders Seçin</label>
                             <select
                                 value={selectedSection}
                                 onChange={(e) => setSelectedSection(e.target.value)}
                                 className="w-full px-4 py-3 rounded-lg border border-border bg-background focus:outline-none focus:ring-2 focus:ring-primary/20"
                             >
-                                <option value="">Seksiyon seçin...</option>
+                                <option value="">Ders seçin...</option>
                                 {sections.map(s => (
                                     <option key={s.id} value={s.id}>
                                         {s.name} - Seksiyon {s.sectionNumber}

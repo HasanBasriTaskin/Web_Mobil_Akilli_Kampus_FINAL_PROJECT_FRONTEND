@@ -9,7 +9,7 @@ let connection = null;
 let reconnectTimer = null;
 let hubNotAvailable = false;
 
-const HUB_URL = 'http://127.0.0.1:5150';
+const HUB_URL = process.env.NEXT_PUBLIC_BACKEND_URL || 'http://127.0.0.1:5150';
 
 /**
  * SignalR bağlantısını başlatır

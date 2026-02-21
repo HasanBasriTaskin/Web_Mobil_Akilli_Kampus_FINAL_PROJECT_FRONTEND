@@ -16,13 +16,81 @@ export async function getEvents(params = {}) {
 
     const queryString = queryParams.toString();
     const response = await fetch(`/api/v1/events${queryString ? `?${queryString}` : ''}`);
-    
+
     if (!response.ok) {
         throw new Error('Etkinlikler yüklenemedi');
     }
-    
+
     const data = await response.json();
     return data;
+}
+
+/**
+ * Yeni etkinlik oluştur (Admin/Faculty only)
+ * @param {object} eventData - Etkinlik verileri
+ */
+export async function createEvent(eventData) {
+    const token = localStorage.getItem('accessToken');
+    const response = await fetch('/api/v1/events', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(eventData)
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.errors?.[0] || 'Etkinlik oluşturulamadı');
+    }
+
+    return await response.json();
+}
+
+/**
+ * Etkinlik güncelle (Admin/Faculty only)
+ * @param {number} eventId - Etkinlik ID
+ * @param {object} eventData - Güncellenecek veriler
+ */
+export async function updateEvent(eventId, eventData) {
+    const token = localStorage.getItem('accessToken');
+    const response = await fetch(`/api/v1/events/${eventId}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(eventData)
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.errors?.[0] || 'Etkinlik güncellenemedi');
+    }
+
+    return await response.json();
+}
+
+/**
+ * Etkinlik sil (Admin/Faculty only)
+ * @param {number} eventId - Etkinlik ID
+ */
+export async function deleteEvent(eventId) {
+    const token = localStorage.getItem('accessToken');
+    const response = await fetch(`/api/v1/events/${eventId}`, {
+        method: 'DELETE',
+        headers: {
+            'Authorization': `Bearer ${token}`
+        }
+    });
+
+    if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.errors?.[0] || 'Etkinlik silinemedi');
+    }
+
+    return await response.json();
 }
 
 /**
@@ -31,11 +99,11 @@ export async function getEvents(params = {}) {
  */
 export async function getEventById(eventId) {
     const response = await fetch(`/api/v1/events/${eventId}`);
-    
+
     if (!response.ok) {
         throw new Error('Etkinlik detayı yüklenemedi');
     }
-    
+
     const data = await response.json();
     return data;
 }
@@ -53,21 +121,21 @@ export async function registerToEvent(eventId, formData = {}) {
         },
         body: JSON.stringify(formData)
     });
-    
+
     if (!response.ok) {
         const errorText = await response.text();
         let errorMessage = 'Kayıt işlemi başarısız oldu';
-        
+
         try {
             const errorJson = JSON.parse(errorText);
             errorMessage = errorJson.message || errorMessage;
         } catch {
             errorMessage = errorText || errorMessage;
         }
-        
+
         throw new Error(errorMessage);
     }
-    
+
     const result = await response.json();
     return result;
 }
@@ -77,11 +145,11 @@ export async function registerToEvent(eventId, formData = {}) {
  */
 export async function getMyEvents() {
     const response = await fetch('/api/v1/events/my-events');
-    
+
     if (!response.ok) {
         throw new Error('Kayıtlı etkinlikler yüklenemedi');
     }
-    
+
     const data = await response.json();
     return data;
 }
@@ -97,21 +165,21 @@ export async function cancelEventRegistration(registrationId) {
             'Content-Type': 'application/json',
         }
     });
-    
+
     if (!response.ok) {
         const errorText = await response.text();
         let errorMessage = 'Kayıt iptal edilemedi';
-        
+
         try {
             const errorJson = JSON.parse(errorText);
             errorMessage = errorJson.message || errorMessage;
         } catch {
             errorMessage = errorText || errorMessage;
         }
-        
+
         throw new Error(errorMessage);
     }
-    
+
     const result = await response.json();
     return result;
 }
@@ -128,21 +196,21 @@ export async function validateEventQRCode(qrCode) {
         },
         body: JSON.stringify({ qrCode })
     });
-    
+
     if (!response.ok) {
         const errorText = await response.text();
         let errorMessage = 'QR kod doğrulanamadı';
-        
+
         try {
             const errorJson = JSON.parse(errorText);
             errorMessage = errorJson.message || errorMessage;
         } catch {
             errorMessage = errorText || errorMessage;
         }
-        
+
         throw new Error(errorMessage);
     }
-    
+
     const result = await response.json();
     return result;
 }
@@ -159,21 +227,21 @@ export async function checkInEvent(qrCode) {
         },
         body: JSON.stringify({ qrCode })
     });
-    
+
     if (!response.ok) {
         const errorText = await response.text();
         let errorMessage = 'Check-in başarısız oldu';
-        
+
         try {
             const errorJson = JSON.parse(errorText);
             errorMessage = errorJson.message || errorMessage;
         } catch {
             errorMessage = errorText || errorMessage;
         }
-        
+
         throw new Error(errorMessage);
     }
-    
+
     const result = await response.json();
     return result;
 }
@@ -184,11 +252,11 @@ export async function checkInEvent(qrCode) {
  */
 export async function getEventAttendeeCount(eventId) {
     const response = await fetch(`/api/v1/events/${eventId}/attendees`);
-    
+
     if (!response.ok) {
         throw new Error('Katılımcı sayısı yüklenemedi');
     }
-    
+
     const data = await response.json();
     return data;
 }
