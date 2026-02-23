@@ -164,7 +164,7 @@ export async function getTranscript() {
  * @returns {Promise<Blob>} PDF dosyası
  */
 export async function getTranscriptPDF() {
-    const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '/api/v1';
+    const API_BASE_URL = process.env.NEXT_PUBLIC_FULL_API_URL || '/api/v1';
     const token = typeof window !== 'undefined' ? localStorage.getItem('accessToken') : null;
 
     const response = await fetch(`${API_BASE_URL}/grades/transcript/pdf`, {
