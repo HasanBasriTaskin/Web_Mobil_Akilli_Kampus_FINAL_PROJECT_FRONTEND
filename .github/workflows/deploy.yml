@@ -1,9 +1,15 @@
 name: Deploy to Production
 
 on:
-  push:
-    #branches:
-      # main
+  # Otomatik deploy'u şimdilik kapattık.
+  # Gelecekte tekrar açmak için yorumları kaldırabilirsin:
+  #
+  # push:
+  #   branches:
+  #     - main
+
+  # Manuel tetikleme (Actions > Deploy to Production > Run workflow)
+  workflow_dispatch:
 
 jobs:
   deploy:
