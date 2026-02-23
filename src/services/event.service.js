@@ -4,6 +4,8 @@
  * Backend endpoint'leri hazır olmadığı için mock API kullanılıyor
  */
 
+const API_BASE_URL = process.env.NEXT_PUBLIC_FULL_API_URL || '/api/v1';
+
 /**
  * Etkinlik listesi getir
  * @param {object} params - { category, date, search }
@@ -15,7 +17,7 @@ export async function getEvents(params = {}) {
     if (params.search) queryParams.append('search', params.search);
 
     const queryString = queryParams.toString();
-    const response = await fetch(`/api/v1/events${queryString ? `?${queryString}` : ''}`);
+    const response = await fetch(`${API_BASE_URL}/events${queryString ? `?${queryString}` : ''}`);
 
     if (!response.ok) {
         throw new Error('Etkinlikler yüklenemedi');
@@ -31,7 +33,7 @@ export async function getEvents(params = {}) {
  */
 export async function createEvent(eventData) {
     const token = localStorage.getItem('accessToken');
-    const response = await fetch('/api/v1/events', {
+    const response = await fetch('${API_BASE_URL}/events', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -55,7 +57,7 @@ export async function createEvent(eventData) {
  */
 export async function updateEvent(eventId, eventData) {
     const token = localStorage.getItem('accessToken');
-    const response = await fetch(`/api/v1/events/${eventId}`, {
+    const response = await fetch(`${API_BASE_URL}/events/${eventId}`, {
         method: 'PUT',
         headers: {
             'Content-Type': 'application/json',
@@ -78,7 +80,7 @@ export async function updateEvent(eventId, eventData) {
  */
 export async function deleteEvent(eventId) {
     const token = localStorage.getItem('accessToken');
-    const response = await fetch(`/api/v1/events/${eventId}`, {
+    const response = await fetch(`${API_BASE_URL}/events/${eventId}`, {
         method: 'DELETE',
         headers: {
             'Authorization': `Bearer ${token}`
@@ -98,7 +100,7 @@ export async function deleteEvent(eventId) {
  * @param {string} eventId - Etkinlik ID
  */
 export async function getEventById(eventId) {
-    const response = await fetch(`/api/v1/events/${eventId}`);
+    const response = await fetch(`${API_BASE_URL}/events/${eventId}`);
 
     if (!response.ok) {
         throw new Error('Etkinlik detayı yüklenemedi');
@@ -114,7 +116,7 @@ export async function getEventById(eventId) {
  * @param {object} formData - Kayıt form verileri
  */
 export async function registerToEvent(eventId, formData = {}) {
-    const response = await fetch(`/api/v1/events/${eventId}/register`, {
+    const response = await fetch(`${API_BASE_URL}/events/${eventId}/register`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -144,7 +146,7 @@ export async function registerToEvent(eventId, formData = {}) {
  * Kullanıcının kayıt olduğu etkinlikleri getir
  */
 export async function getMyEvents() {
-    const response = await fetch('/api/v1/events/my-events');
+    const response = await fetch('${API_BASE_URL}/events/my-events');
 
     if (!response.ok) {
         throw new Error('Kayıtlı etkinlikler yüklenemedi');
@@ -159,7 +161,7 @@ export async function getMyEvents() {
  * @param {string} registrationId - Kayıt ID
  */
 export async function cancelEventRegistration(registrationId) {
-    const response = await fetch(`/api/v1/events/registrations/${registrationId}/cancel`, {
+    const response = await fetch(`${API_BASE_URL}/events/registrations/${registrationId}/cancel`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -189,7 +191,7 @@ export async function cancelEventRegistration(registrationId) {
  * @param {string} qrCode - QR kod
  */
 export async function validateEventQRCode(qrCode) {
-    const response = await fetch('/api/v1/events/checkin/validate', {
+    const response = await fetch('${API_BASE_URL}/events/checkin/validate', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -220,7 +222,7 @@ export async function validateEventQRCode(qrCode) {
  * @param {string} qrCode - QR kod
  */
 export async function checkInEvent(qrCode) {
-    const response = await fetch('/api/v1/events/checkin', {
+    const response = await fetch('${API_BASE_URL}/events/checkin', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -251,7 +253,7 @@ export async function checkInEvent(qrCode) {
  * @param {string} eventId - Etkinlik ID
  */
 export async function getEventAttendeeCount(eventId) {
-    const response = await fetch(`/api/v1/events/${eventId}/attendees`);
+    const response = await fetch(`${API_BASE_URL}/events/${eventId}/attendees`);
 
     if (!response.ok) {
         throw new Error('Katılımcı sayısı yüklenemedi');
