@@ -1,34 +1,16 @@
-import Link from 'next/link';
-import { AuthLayout } from '@/components/layout/AuthLayout';
-import { LoginForm } from '@/components/auth/LoginForm';
+import { LoginView } from '@/components/auth/LoginView';
 
 export const metadata = {
     title: 'Giriş Yap - SmartCampus',
     description: 'SmartCampus hesabınıza giriş yapın',
+    // Dizine girecek tek adres "/" olsun
+    alternates: { canonical: '/' },
 };
 
 /**
  * Login Page
- * Modern, minimalist giriş sayfası
+ * "/" ile aynı görünüm; canonical "/" adresine işaret eder.
  */
 export default function LoginPage() {
-    return (
-        <AuthLayout
-            title="Hoş Geldiniz"
-            subtitle="Hesabınıza giriş yapın"
-            footer={
-                <span>
-                    Hesabınız yok mu?{' '}
-                    <Link
-                        href="/register"
-                        className="font-medium text-primary hover:underline"
-                    >
-                        Kayıt Ol
-                    </Link>
-                </span>
-            }
-        >
-            <LoginForm />
-        </AuthLayout>
-    );
+    return <LoginView />;
 }
