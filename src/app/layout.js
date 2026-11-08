@@ -12,6 +12,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata = {
+  metadataBase: new URL("https://campus.taskinnovation.net"),
   title: "SmartCampus",
   description: "Akıllı Kampüs Yönetim Sistemi",
 };
