@@ -2,6 +2,11 @@
 
 Akıllı Kampüs Yönetim Sistemi - Frontend uygulaması.
 
+## Canlı Demo
+
+- **Uygulama:** https://campus.taskinnovation.net
+- **Proje yazısı:** https://taskinnovation.net/blog/akilli-kampus-smart-campus
+
 ## 🚀 Hızlı Başlangıç
 
 ### Gereksinimler
